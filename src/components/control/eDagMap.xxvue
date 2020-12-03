@@ -1,0 +1,836 @@
+<template>
+    <div style="position:relative;">   
+    <div  class="css_animation "><div class="laydiv"></div><div class="fontdiv cssrota" ><i class="fas fa-location-arrow"></i></div><div class="circle"></div></div>
+    <div class="title">{{lockdevice.name}}({{lockdevice.issi}})  <div class="toolbox"  ><span @click="changelinkmap" :class="[linkmap?'linkmap':'']" ><i class="fas fa-tv" ></i></span><span @click="closemap"><i class="fas fa-times-circle"></i></span></div></div>
+  
+    </div>
+</template>
+<script>
+import store from "@/vuex/store"
+import {UPDATE} from '@/vuex/modul_types'
+import math from "@/mixin/math"
+import {Map,View} from "ol";
+import TileLayer from 'ol/layer/Tile';
+import sourceXYZ from 'ol/source/XYZ';
+import TileImage from 'ol/source/TileImage';
+import layerGroup from 'ol/layer/Group';
+import TileGrid from 'ol/tilegrid/TileGrid';
+import WMTSTileGrid from 'ol/tilegrid/WMTS';
+import {defaults as defaultControls} from 'ol/control';
+import FullScreen from 'ol/control/FullScreen.js';
+import {transform,transformExtent} from 'ol/proj.js';
+import Projection from 'ol/proj/Projection';
+import {get as projget,fromLonLat} from 'ol/proj';
+import {getWidth,getCenter} from 'ol/extent';
+import {Vector as VectorSource,WMTS} from 'ol/source.js';
+import {Vector as VectorLayer} from 'ol/layer.js';
+import Feature from 'ol/Feature.js';
+import Point from 'ol/geom/Point.js';
+import {getTopLeft} from 'ol/extent';
+import {Circle as CircleStyle, Fill, Stroke, Style,Text} from 'ol/style.js';
+import { debug } from 'util';
+import Overlay from 'ol/Overlay.js';
+import proj4 from 'proj4';
+
+let noticemod;
+export default {
+    mounted(){
+        this.creatCoordinateBiasedAlgorithm();
+        this.initMap();
+        
+    },
+    mixins:[math,],
+    data: function () {
+            return {
+            map:null,
+            option:null,
+            mapview:null,
+            layer:null,
+            lo:'',//中心点
+            la:'',//中心点
+            maxLevel:'',//最大几层
+            minLevel:'',//最小几层
+            currentLevel:'', //显示第几层
+            gistype:'',
+            point_div:null,
+            point_overlay:null, 
+            CoordinateBiasedAlgorithm:null,//偏移算法
+          
+            }
+        },
+    destroyed(){ 
+         clearInterval(noticemod); 
+         if(this.linkmap)store.dispatch(UPDATE,''); //如果该设备投屏，解锁后清空投屏ID
+        },
+    
+      computed: {
+    linkmap: function () {
+        return this.lockdevice.userid==store.getters.get_id;
+    },
+    coordinates:function(){
+        return transform([parseFloat( this.lockdevice.lon), parseFloat(this.lockdevice.lat)], 'EPSG:4326', 'EPSG:3857');
+    }
+  },
+  watch:{
+      coordinates:function(newval,oldval){
+            this.map.getView().animate({center:this.coordinates}); //,{rotation:rotationvalue}
+            this.point_overlay.setPosition(this.coordinates);
+            let offsetX =  oldval[0] - newval[0];
+            let offsetY =  oldval[1] - newval[1];
+            offsetX = offsetX == 0 ? Math.pow(0.1, 10) : offsetX;
+            var degree = ((Math.PI - Math.atan(offsetY / offsetX) - offsetX / Math.abs(offsetX) * Math.PI / 2) / Math.PI * 180);
+                if (degree >= 180) {
+                    degree = (degree - 180).toFixed(0)
+                } else if (degree < 180) {
+                    degree = (degree + 180).toFixed(0)
+                }
+            this.point_div.style.transform = 'rotate('+degree+'deg)';
+            this.map.render();
+      }, 
+     
+   },
+   props:['lockdevice'],
+   methods:{
+       changelinkmap(){
+           if (this.linkmap==true){
+             store.dispatch(UPDATE,'');
+             onMove();//地图移动
+           }else{
+           store.dispatch(UPDATE,this.lockdevice.userid); 
+            }
+        projectScreen(store.getters.get_id,this.lockdevice.lon,this.lockdevice.lat);  //通知主地图移动     
+       },
+       closemap(){
+             useprameters.lockids.forEach((item,index)=>{   //查询正在通话中是否存在
+                            if(item.userid==this.lockdevice.userid){
+                                useprameters.lockids.splice(index,1); 
+                            }
+                    });
+                if (this.linkmap){
+                     projectScreen('','','');//通知主地图取消关联
+                }
+       },
+        initMap() {
+           
+            let streetMapLayer; 
+            this.gistype =  useprameters.GISTYPE.toLowerCase();
+            this.lo = useprameters.PGIS_Center_lo;//中心点
+            this.la = useprameters.PGIS_Center_la;//中心点
+            this.maxLevel = useprameters.maxLevel;//最大几层
+            this.minLevel = useprameters.minLevel;//最小几层
+            this.currentLevel = useprameters.maxLevel-2;//显示第几层
+            this.option = this.createBaseMapParameter(this.gistype);
+
+            
+            switch (this.gistype) {
+                case "tianditu":
+                    this.getWebGIS();
+                    break;
+                case "webgisno":
+                    this.getWebGISNo();
+                    break;
+                case "google":
+                   this.getGoogleBiased();
+                    break;
+                case "pgis":
+                   this.getPGIS();
+                    break;
+                case "wspgis":
+                   this.getWLPGIS();
+                    break;
+                case "baidu":
+                    this.getBaiduBiased();
+                    break;
+                case "gaode":
+                    this.getGaodeBiased();
+            }
+
+             this.point_div = this.$el.getElementsByClassName("css_animation")[0];
+             this.point_overlay = new Overlay({
+                element: this.point_div,
+                positioning: 'center-center'
+            });
+
+            this.map = new Map({
+            layers: [new layerGroup({
+                'title': '基础图层',
+                layers: [this.layer]
+            })
+            ],
+            controls: defaultControls({
+                attribution: false,
+                rotate: false,
+                zoom:false
+            }).extend([]),
+            view: this.mapview,
+            target: this.$el
+        });
+        
+        this.map.getView().animate({center:this.coordinates}); //,{rotation:rotationvalue}
+        this.point_overlay.setPosition(this.coordinates);
+        this.map.addOverlay(this.point_overlay);
+         
+   
+        },
+        
+        //创建街景图和卫星图的参数，根据不同地图各自的算法
+        createBaseMapParameter(gistype){
+           var parm = {};
+            parm.gistype = gistype;//地图类型
+            parm.mapurl = useprameters.Emapurl;//地图地址
+            parm.maptype = useprameters.maptype;//图片类型
+            parm.maxLevel = useprameters.maxLevel;//最大几层
+            switch (gistype) {
+                case "tianditu":
+                    break;
+                case "webgisno":
+                    //原点坐标
+                    var Origin_Lo = useprameters.OriginLo;
+                    var Origin_La = useprameters.OriginLa;
+                    var RDLat = map_region.RDLat;
+                    var RDLng = map_region.RDLng;
+                    var extent_proj =transformExtent([parseFloat(Origin_Lo), parseFloat(Origin_La), parseFloat(RDLng), parseFloat(RDLat)], 'EPSG:4326', 'EPSG:3857');
+                    var resolution = (extent_proj[2] - extent_proj[0]) / useprameters.mapsize;
+
+                    // 自定义分辨率和瓦片坐标系
+                    var resolutions = [];
+                    var maxResolution = resolution;
+
+                    //分辨率数组
+                    for (var i = 0; i <= parseInt(parm.maxLevel) ; i++) {
+                        resolutions[i] = maxResolution / Math.pow(2, i);
+                    }
+
+                    //瓦片网格
+                    var tilegrid = new TileGrid({
+                        tileSize: [useprameters.mapsize, useprameters.mapsize],
+                        origin: transform([parseFloat(Origin_Lo) + parseFloat(useprameters.deviation_lo), parseFloat(Origin_La) + parseFloat(useprameters.deviation_la)], 'EPSG:4326', 'EPSG:3857'),    // 设置原点坐标
+                        resolutions: resolutions    // 设置分辨率
+                    });
+
+                    //坐标系
+                    var projection = new Projection({
+                        code: 'EPSG:3857',
+                        units: 'm'
+                    })
+
+                    parm.projection = projection;
+                    parm.tilegrid = tilegrid;
+                    break;
+                case "google":
+                  
+                    console.info(this.CoordinateBiasedAlgorithm);
+                    var projection = this.CoordinateBiasedAlgorithm.createGoogleProjection("GoogleBiased", [parseFloat(this.lo), parseFloat(this.la)]);//创建谷歌偏移的坐标系
+
+                    parm.projection = projection;
+                    break;
+                case "pgis":
+                    var projection = projget('EPSG:3857');//坐标系
+                    var projectionExtent = projection.getExtent();//坐标范围
+                    var size = getWidth(projectionExtent) / 256;//最大宽度
+                    var resolutions = [];//分辨率数组
+                    var matrixIds = [];//瓦片网格
+                    for (var z = 0; z < parseInt(parm.maxLevel) ; ++z) {
+                        resolutions[z] = size / Math.pow(2, z);
+                        matrixIds[z] = z;
+                    }
+
+                    parm.projection = projection;
+                    parm.projectionExtent = projectionExtent;
+                    parm.resolutions = resolutions;
+                    parm.matrixIds = matrixIds;
+                    break;
+                case "wspgis":
+                    var projection = projget('EPSG:4326');//坐标系
+                    var size = 0.703125;
+                    var resolutions = [];//分辨率数组
+                    var matrixIds = [];//瓦片网格
+                    for (var z = 10; z <= 19; ++z) {
+                        resolutions[z] = size / Math.pow(2, z - 1);
+                        matrixIds[z] = z;
+                    }
+
+                    parm.resolutions = resolutions;
+                    parm.matrixIds = matrixIds;
+                    parm.projection = projection;
+                    break;
+                case "baidu":
+              
+                    var biased = this.CoordinateBiasedAlgorithm.getBaiduBiased([parseFloat(this.lo), parseFloat(this.la)]);//计算百度偏移的距离
+
+                    var resolutions = [];
+                    var matrixIds = [];
+                    for (var i = 0; i < parseInt(parm.maxLevel) + 1 ; i++) {
+                        resolutions[i] = Math.pow(2, 18 - i);
+                        matrixIds[i] = i;
+                    }
+                    var tilegrid = new TileGrid({
+                        origin: biased.map(function (item) { return -item }),
+                        resolutions: resolutions,
+                        matrixIds: matrixIds
+                    });
+
+                    proj4.defs('BD-MC', '+proj=merc +lon_0=0 +units=m +ellps=clrk66 +no_defs');//定义百度Mercator坐标系
+
+                    parm.projection = 'BD-MC';
+                    parm.resolutions = resolutions;
+                    parm.tilegrid = tilegrid;
+                    parm.center = [lon, lat];
+                    break;
+                case "gaode":
+                    var lon = useprameters.PGIS_Center_lo;//中心点
+                    var lat = useprameters.PGIS_Center_la;//中心点
+                    var projection = this.CoordinateBiasedAlgorithm.createGoogleProjection("GaodeBiased", [parseFloat(this.lon), parseFloat(this.lat)]);//创建谷歌偏移的坐标系
+                    parm.projection = projection;
+                    break;
+            }
+            return parm;
+        },
+      
+        //创建webgisno街景底图图层
+        getWebGISNo(){
+            var osmSource = new TileImage({
+                cacheSize: 500,
+                wrapX: false,
+                projection: this.option.projection,
+                tileGrid: this.option.tilegrid,
+                tileUrlFunction: function (tileCoord, pixelRatio, proj) {  // 参数tileCoord为瓦片坐标
+                    var z = tileCoord[0];
+                    var x = tileCoord[1] + 1;
+                    var y = (-tileCoord[2]);
+                    return this.option.mapurl + "Normal/" + z + "/" + y + "_" + x + "." + this.option.maptype;
+                },
+            });
+
+            // 添加一个使用离线瓦片地图的层
+            var streetMapLayer = new TileLayer({
+                source: osmSource
+            });
+
+            this.layer= streetMapLayer; 
+
+            var Origin_Lo = useprameters.OriginLo;
+            var Origin_La = useprameters.OriginLa;
+            var RDLat = map_region.RDLat;
+            var RDLng = map_region.RDLng;
+            var extent_proj = transformExtent([parseFloat(Origin_Lo), parseFloat(Origin_La), parseFloat(RDLng), parseFloat(RDLat)], 'EPSG:4326', 'EPSG:3857');
+            var resolution = (extent_proj[2] - extent_proj[0]) / useprameters.mapsize;
+
+            var projection = new Projection({
+                code: 'EPSG:3857',
+                units: 'm'
+            });
+            var view = new View({
+                projection: projection,
+                center: transform([parseFloat(this.lo), parseFloat(this.la)], 'EPSG:4326', 'EPSG:3857'),
+                zoom: parseInt(this.currentLevel),
+                minZoom: parseInt(this.minLevel),
+                maxZoom: parseInt(this.maxLevel),
+                maxResolution: resolution,
+                minResolution: resolution / Math.pow(2, parseInt(this.maxLevel))
+            });
+            this.mapview= view;
+
+        },
+         //创建天地图街景底图图层
+        getWebGIS(){
+          
+            var streetMapLayer = new TileLayer({//xzj--2018/8/16--将图层提出，添加id属性
+                source: new sourceXYZ({
+                    cacheSize: 500,
+                    wrapX: false,
+                    url: this.option.mapurl + "Normal/" + '{z}/{x}/{y}.' + this.option.maptype
+                })
+            });
+            this.layer = streetMapLayer;
+          
+             var view = new View({
+                center:transform([parseFloat(this.lo), parseFloat(this.la)], 'EPSG:4326', 'EPSG:3857'),
+                zoom: parseInt(this.currentLevel),
+                minZoom: parseInt(this.minLevel),
+                maxZoom: parseInt(this.maxLevel),
+            });
+            this.mapview= view;
+          
+        },
+         //创建pgis街景底图图层
+        getPGIS(){
+            var streetMapLayer = new TileLayer({//xzj--2018/8/13--将图层提出并添加id属性
+                source: new WMTS({
+                    cacheSize: 500,
+                    url: this.option.mapurl,
+                    layer: '0',
+                    matrixSet: 'EPSG:3857',
+                    format: 'image/' + this.option.maptype,
+                    projection: this.option.projection,
+                    tileGrid: new WMTSTileGrid({
+                        origin: getTopLeft(this.option.projectionExtent),
+                        resolutions: this.option.resolutions,
+                        matrixIds: this.option.matrixIds
+                    }),
+                    style: 'default',
+                    wrapX: false
+                })
+            });
+            this.layer = streetMapLayer;
+
+            var view = new View({
+                center: transform([parseFloat(this.lo), parseFloat(this.la)], 'EPSG:4326', 'EPSG:3857'),
+                zoom: parseInt(this.currentLevel),
+                minZoom: parseInt(this.minLevel),
+                maxZoom: parseInt(this.maxLevel)
+            })
+            this.mapview= view;
+        },
+         //创建wlpgis街景底图图层
+        getWLPGIS(){
+            var streetMapLayer = new TileLayer({//xzj--2018/8/13--将图层提出并添加id属性
+                source: new WMTS({
+                    cacheSize: 500,
+                    url: this.option.mapurl,
+                    layer: this.option.maptype,
+                    matrixSet: 'c',
+                    format: 'title',
+                    tileGrid: new WMTSTileGrid({
+                        origin: [-180.0, 90.0],
+                        resolutions: this.option.resolutions,
+                        matrixIds: this.option.matrixIds,
+                        extent: [-180.0, -90.0, 180.0, 90.0]
+                    }),
+                    style: 'default',
+                    version: '1.0.0',
+                    projection: this.option.projection
+                })
+            });
+            this.layer = streetMapLayer;
+
+            var projection = projget('EPSG:4326');
+            var view = new View({
+                center: [104.20326232910156, 23.453613293822854],
+                zoom: 10,
+                minZoom: 10,
+                maxZoom: 20,
+                projection: projection
+            });
+             this.mapview= view;
+        },
+         //创建动态纠偏坐标系的谷歌街景图
+        getGoogleBiased(){
+           
+             var projection = new Projection({
+                code: 'EPSG:3857',
+                units: 'm',
+                
+               
+            });
+            var theview = new View({
+                projection: projection,
+                center: fromLonLat([parseFloat(this.lo), parseFloat(this.la)]),
+                zoom: parseInt(this.currentLevel),
+                minZoom: parseInt(this.minLevel),
+                maxZoom: parseInt(this.maxLevel),
+            });
+            this.mapview= theview;
+
+            var count=1;
+            let that=this;
+            var streetMapSource = new sourceXYZ({
+                cacheSize: 500,
+                projection: this.option.projection,
+                url: this.option.mapurl + "Normal/" + '{z}/{x}/{x}_{y}.' + this.option.maptype,
+                tileLoadFunction: function (imageTile, src) {
+                    var view =  theview;
+                    var mapExtent = view.calculateExtent([300,220]);
+                    var center =  getCenter(mapExtent);
+  
+                    var projection = that.CoordinateBiasedAlgorithm.createGoogleProjection("GoogleBiased" + count, center);
+                    streetMapSource.projection_ = projection;
+                    imageTile.getImage().src = src;
+                    count++;
+                }
+            });
+            var streetMapLayer = new TileLayer({
+                source: streetMapSource
+            });
+            this.layer = streetMapLayer;
+
+          
+           
+           
+        },
+         //创建动态纠偏的百度街景图
+        getBaiduBiased(){
+            var currentCenter = this.option.center, currentBiased = [0, 0];//定义当前中心点和当前偏移情况
+            var count = 0;
+            let that =this;
+            var streetMapSource = new TileImage({
+                cacheSize: 500,
+                projection: this.option.projection,
+                tileGrid: this.option.tilegrid,
+                tileUrlFunction: function (tileCoord, pixelRatio, proj) {
+                    if (!tileCoord) {
+                        return "";
+                    }
+                    var z = tileCoord[0];
+                    var x = tileCoord[1];
+                    var y = tileCoord[2];
+                    if (x < 0) {
+                        x = "M" + (-x);
+                    }
+                    if (y < 0) {
+                        y = "M" + (-y);
+                    }
+
+                    var view = that.map.getView();
+                    var mapExtent = view.calculateExtent(that.map.getSize());
+                    var center = ol.extent.getCenter(mapExtent);
+                    if (currentCenter[0] != center[0] && currentCenter[1] != center[1]) {
+                        currentBiased = that.CoordinateBiasedAlgorithm.getBaiduBiased(center);//计算百度偏移的距离
+                        currentCenter = center;
+                    }
+                    
+                    streetMapSource.tileGrid.origin_ = currentBiased.map(function (item) { return -item });
+
+                    return that.option.mapurl + "Normal/" + z + "/" + x + "/" + y + "." + that.option.maptype
+
+                }
+            });
+            var streetMapLayer = new TileLayer({
+                source: streetMapSource
+            });
+            this.layer = streetMapLayer;
+
+             var projection = new Projection({
+                code: 'EPSG:3857',
+                units: 'm'
+            });
+            var view = new View({
+                projection: projection,
+                center: fromLonLat([parseFloat(this.lo), parseFloat(this.la)]),
+                zoom: parseInt(this.currentLevel),
+                minZoom: parseInt(this.minLevel),
+                maxZoom: parseInt(this.maxLevel),
+            });
+             this.mapview= view;
+        },
+         //创建动态纠偏坐标系的高德地图
+        getGaodeBiased(){
+            var count = 1;
+            let that =this;
+            var streetMapSource = new sourceXYZ({
+                cacheSize:500,
+                projection: this.option.projection,
+                url: this.option.mapurl + "Normal/" + '{z}/{x}/{x}_{y}.' + this.option.maptype,
+                tileLoadFunction: function (imageTile, src) {
+                    var view = that.map.getView();
+                    var mapExtent = view.calculateExtent(that.map.getSize());
+                    var center = getCenter(mapExtent)
+                    var projection = that.CoordinateBiasedAlgorithm.createGaodeProjection("GaodeBiased" + count, center);
+                    streetMapSource.projection_ = projection;
+                    imageTile.getImage().src = src;
+                    count++;
+                }
+            });
+            var streetMapLayer = new TileLayer({
+                source: streetMapSource
+            });
+            this.layer = streetMapLayer;
+
+             var projection = new Projection({
+                code: 'EPSG:3857',
+                units: 'm'
+            });
+            var view = new View({
+                projection: projection,
+                center: fromLonLat([parseFloat(this.lo), parseFloat(this.la)]),
+                zoom: parseInt(this.currentLevel),
+                minZoom: parseInt(this.minLevel),
+                maxZoom: parseInt(this.maxLevel),
+            });
+             this.mapview= view;
+        },
+        updateposition(){
+            
+        var that = this;
+        noticemod= setInterval(function (){
+              //   var feature =vectorSource.getFeatures();
+               
+                   var cd1= that.getRandomNumberByRange(0,2);
+                   var cd2 = that.getRandomNumberByRange(0,2);
+                    switch (cd1){
+                        case 1:
+                            that.coordinates[0]+=100;
+                              break;
+                        case 2:
+                            that.coordinates[0]-=100;
+                        break;
+                        default:
+                            break;
+                    }
+                     switch (cd2){
+                        case 1:
+                            that.coordinates[1]+=100;
+                              break;
+                        case 2:
+                            that.coordinates[1]-=100;
+                        break;
+                        default:
+                            break;
+                    }
+                    let rotationvalue=0;
+                    switch(cd1+""+cd2){
+                        case '00':
+                            rotationvalue=0;
+                            break;
+                        case '01':
+                             rotationvalue=0;
+                             break;
+                        case '02':
+                           rotationvalue=180;  
+                           break; 
+                        case '10':
+                            rotationvalue=90;
+                            break;
+                        case '11':
+                             rotationvalue=45;
+                             break;
+                        case '12':
+                           rotationvalue=135;  
+                           break; 
+                        case '20':
+                            rotationvalue=270;
+                            break;
+                        case '21':
+                             rotationvalue=315;
+                             break;
+                        case '22':
+                             rotationvalue=225;  
+                             break;         
+
+                    }
+                    
+                   that.point_div.style.transform = 'rotate('+rotationvalue+'deg)';
+                   that.map.getView().animate({center:that.coordinates}); //,{rotation:rotationvalue}
+                  // console.info(that.coordinates);
+                   that.point_overlay.setPosition(that.coordinates);
+                   that.map.render();
+                  
+                           
+         }, 3000);
+        },
+
+        creatCoordinateBiasedAlgorithm(){
+            let _this=this;
+            this.CoordinateBiasedAlgorithm = {
+                    PI : 3.14159265358979324,
+                    outOfChina : function (lat, lon) {//是否在中国之外
+                        if (lon < 72.004 || lon > 137.8347)
+                            return true;
+                        if (lat < 0.8293 || lat > 55.8271)
+                            return true;
+                        return false;
+                    },
+                    wgs84_gcj02 : {
+                        transform:function(wgs_coordinate){//wgs84坐标转换到gcj02（中国标准的谷歌坐标系）
+                            if (_this.CoordinateBiasedAlgorithm.outOfChina(wgs_coordinate[1], wgs_coordinate[0]))
+                                return wgs_coordinate;
+
+                            var d = this.delta(wgs_coordinate[1], wgs_coordinate[0]);
+                            return [wgs_coordinate[0] + d.lon, wgs_coordinate[1] + d.lat];
+                        },
+                        delta: function (lat, lon) {
+                            var a = 6378245.0; //  a: 卫星椭球坐标投影到平面地图坐标系的投影因子。
+                            var ee = 0.00669342162296594323; //  ee: 椭球的偏心率。
+                            var pi = _this.CoordinateBiasedAlgorithm.PI;
+                            var dLat = this.transformLat(lon - 105.0, lat - 35.0);
+                            var dLon = this.transformLon(lon - 105.0, lat - 35.0);
+                            var radLat = lat / 180.0 * pi;
+                            var magic = Math.sin(radLat);
+                            magic = 1 - ee * magic * magic;
+                            var sqrtMagic = Math.sqrt(magic);
+                            dLat = (dLat * 180.0) / ((a * (1 - ee)) / (magic * sqrtMagic) * pi);
+                            dLon = (dLon * 180.0) / (a / sqrtMagic * Math.cos(radLat) * pi);
+                            return { 'lat': dLat, 'lon': dLon };
+                        },
+                        transformLat: function (x, y) {//转换纬度
+                            var pi = _this.CoordinateBiasedAlgorithm.PI;
+                            var ret = -100.0 + 2.0 * x + 3.0 * y + 0.2 * y * y + 0.1 * x * y + 0.2 * Math.sqrt(Math.abs(x));
+                            ret += (20.0 * Math.sin(6.0 * x * pi) + 20.0 * Math.sin(2.0 * x * pi)) * 2.0 / 3.0;
+                            ret += (20.0 * Math.sin(y * pi) + 40.0 * Math.sin(y / 3.0 * pi)) * 2.0 / 3.0;
+                            ret += (160.0 * Math.sin(y / 12.0 * pi) + 320 * Math.sin(y * pi / 30.0)) * 2.0 / 3.0;
+                            return ret;
+                        },
+                        transformLon: function (x, y) {//转换经度
+                            var pi = _this.CoordinateBiasedAlgorithm.PI;
+                            var ret = 300.0 + x + 2.0 * y + 0.1 * x * x + 0.1 * x * y + 0.1 * Math.sqrt(Math.abs(x));
+                            ret += (20.0 * Math.sin(6.0 * x * pi) + 20.0 * Math.sin(2.0 * x * pi)) * 2.0 / 3.0;
+                            ret += (20.0 * Math.sin(x * pi) + 40.0 * Math.sin(x / 3.0 * pi)) * 2.0 / 3.0;
+                            ret += (150.0 * Math.sin(x / 12.0 * pi) + 300.0 * Math.sin(x / 30.0 * pi)) * 2.0 / 3.0;
+                            return ret;
+                        }
+                    },
+                    gcj02_bd09 : {
+                        transform: function (gcj_coordinate) {
+                            if (_this.CoordinateBiasedAlgorithm.outOfChina(gcj_coordinate[1], gcj_coordinate[0]))
+                                return gcj_coordinate;
+                            var d = this.delta(gcj_coordinate[1], gcj_coordinate[0]);
+                            return [d.lon, d.lat];
+                        },
+                        delta: function (lat, lon) {
+                            var x_PI = parent._this.CoordinateBiasedAlgorithm.PI * 3000 / 180;
+                            var z = Math.sqrt(lon * lon + lat * lat) + 0.00002 * Math.sin(lat * x_PI);
+                            var theta = Math.atan2(lat, lon) + 0.000003 * Math.cos(lon * x_PI);
+                            var bd_lon = z * Math.cos(theta) + 0.0065;
+                            var bd_lat = z * Math.sin(theta) + 0.006;
+                            return { 'lat': bd_lat, 'lon': bd_lon };
+                        }
+                    },
+                    createGoogleProjection: function (name, coordinate) {//创建谷歌偏移地图的自定义坐标系
+             
+                        if ((coordinate[0] > 180 || coordinate[0] < -180) && (coordinate[1] > 85.06 || coordinate[1] < -85.06)) {
+                            coordinate = proj4("EPSG:3857", "EPSG:4326", coordinate);
+                        }
+                        var coordinate_gcj = this.wgs84_gcj02.transform(coordinate);
+
+                        var coordinate_wgs_proj = proj4("EPSG:4326", "EPSG:3857", coordinate);
+                        var coordinate_gcj_proj = proj4("EPSG:4326", "EPSG:3857", coordinate_gcj);
+
+                        var offsetx = coordinate_gcj_proj[0] - coordinate_wgs_proj[0];
+                        var offsety = coordinate_gcj_proj[1] - coordinate_wgs_proj[1];
+
+                        proj4.defs(name, "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=" + offsetx + " +y_0=" + offsety + " +k=1.0 +units=m +nadgrids=@null +wktext +no_defs");
+                        var projection = new Projection({
+                            code: name,
+                            extent: [-20037508.342789244, -20037508.342789244, 20037508.342789244, 20037508.342789244]
+                        });
+
+                        return projection;
+                    },
+                    createGaodeProjection: function (name, coordinate) {
+                        if ((coordinate[0] > 180 || coordinate[0] < -180) && (coordinate[1] > 85.06 || coordinate[1] < -85.06)) {
+                            coordinate = proj4("EPSG:3857", "EPSG:4326", coordinate);
+                        }
+                        var coordinate_gcj = this.wgs84_gcj02.transform(coordinate);
+
+                        var coordinate_wgs_proj = proj4("EPSG:4326", "EPSG:3857", coordinate);
+                        var coordinate_gcj_proj = proj4("EPSG:4326", "EPSG:3857", coordinate_gcj);
+
+                        var offsetx = coordinate_gcj_proj[0] - coordinate_wgs_proj[0];
+                        var offsety = coordinate_gcj_proj[1] - coordinate_wgs_proj[1];
+
+                        proj4.defs(name, "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=" + offsetx + " +y_0=" + offsety + " +k=1.0 +units=m +nadgrids=@null +wktext +no_defs");
+                        var projection = new Projection({
+                            code: name,
+                            extent: [-20037508.342789244, -20037508.342789244, 20037508.342789244, 20037508.342789244]
+                        });
+
+                        return projection;
+                    },
+                    getBaiduBiased: function (coordinate) {//创建百度偏移地图的自定义坐标系
+                        if ((coordinate[0] > 180 || coordinate[0] < -180) && (coordinate[1] > 85.06 || coordinate[1] < -85.06)) {
+                            coordinate = proj4("EPSG:3857", "EPSG:4326", coordinate);
+                        }
+
+                        var coordinate_gcj = this.wgs84_gcj02.transform(coordinate);
+                        var coordinate_bd = this.gcj02_bd09.transform(coordinate_gcj);
+
+                        var coordinate_wgs_proj = proj4("EPSG:4326", "EPSG:3857", coordinate);
+                        var coordinate_bd_proj = proj4("EPSG:4326", "EPSG:3857", coordinate_bd);
+
+                        var offsetx = coordinate_bd_proj[0] - coordinate_wgs_proj[0];
+                        var offsety = coordinate_bd_proj[1] - coordinate_wgs_proj[1];
+
+                        return [offsetx, offsety];
+                    }
+             }
+             console.info('ok');
+        },
+
+
+    }
+
+}
+</script>
+<style scoped>
+div{
+    height: 100%;
+}
+.css_animation{
+  height:20px;
+  width:20px;  
+}
+.circle{
+    margin: 10px auto;
+    width: 20px;
+    height: 20px;
+    border: 2px transparent solid;
+    border-left-color: #ff5500;
+    border-right-color:#0c80fe;
+    border-radius: 100%;
+    animation: loading1 1s infinite linear;
+}
+@keyframes loading1{
+    from{transform: rotate(0deg)}to{transform: rotate(360deg)}
+}
+.css_animation .laydiv{
+    height:20px;
+    width:20px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 1);
+    transform: scale(0);
+    animation: myfirst 1s;
+    animation-iteration-count: infinite;
+     position: absolute; 
+     
+}
+@keyframes myfirst{
+    to{
+        transform: scale(2);
+        background: rgba(0, 0, 0, 0.2);
+    }
+}
+.css_animation .fontdiv{
+    position: absolute; 
+    height:20px;
+    width:20px;
+    border-radius: 10px;
+    border: 1px solid #fff;
+    background-color: #164b77;
+    color: #fff;
+}
+.cssrota{
+transform:rotate(315deg);
+-ms-transform:rotate(315deg); 	/* IE 9 */
+-moz-transform:rotate(315deg); 	/* Firefox */
+-webkit-transform:rotate(315deg); /* Safari 和 Chrome */
+-o-transform:rotate(315deg); 	/* Opera */
+}
+.title{
+    position: absolute;
+    background-color: rgba(30,144,255,0.8);
+    height: 24px;
+    float: left;
+    width: 100%;
+    z-index: 1;
+ 
+    line-height: 24px;
+    text-align: left;
+    padding-left: 5px;
+    color: #fff;
+}
+.toolbox{
+    float:right;
+}
+.toolbox i,.toolbox svg{
+    font-size: 18px;
+    margin-right: 5px;
+    margin-top: 3px;
+    cursor: pointer;
+}
+.toolbox i:hover,.toolbox svg:hover{
+   color:chartreuse;
+}
+.linkmap svg:nth-child(1){
+  color:chartreuse;
+}
+</style>
