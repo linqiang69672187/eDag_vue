@@ -44,14 +44,22 @@ export default {
                 ],
                 ssri: 'up',
                 legendLabel:'图例',
-                sdate:['2016-01-01', '2016-02-15']
+                sdate:[]
                 
         }
     },
     mounted(){
-     this.createLegend();
-     this.createFeature();
-     this.initMap();
+        let date = new Date();
+        let tYear = date.getFullYear();
+        let m = dete.getMonth()+1 
+        let tmonth = m.toString().length==1?"0"+m:m;
+        let tdate =  date.getDate();
+        this.sdate.push(tYear+'-'+tmonth+'-'+'01');
+        this.sdate.push(tYear+'-'+tmonth+'-'+tdate);
+
+        this.createLegend();
+        this.createFeature();
+        this.initMap();
     },
     methods:{
             createLegend(){
