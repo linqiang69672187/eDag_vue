@@ -1,12 +1,27 @@
 <template>
     <div>
-       <div  class="css_animation ">
-            <div class="laydiv"></div>
+
+       <div id="control">
+           <ul>
+               <li>  
+                   <Select v-model="ssri" style="width:100px">
+                      <Option v-for="item in cityList" :value="item.value" :key="item.value">{{ item.label }}</Option>
+                   </Select>
+           </li>
+               <li>选择起始时间：</li>
+               <li>
+                  <DatePicker :value="sdate" format="yyyy/MM/dd" type="daterange" placement="bottom-end" placeholder="Select date" style="width: 200px"></DatePicker>
+               </li>
+           </ul>
+          
+       </div>
+       <div id="legend">
+
        </div>
     </div>
 </template>
 <script>
-
+import { Select,DatePicker   } from 'iview';
 
 export default {
     data(){
@@ -17,16 +32,92 @@ export default {
                 },
                 map:null,
                 htmap:null,
+                 cityList: [
+                    {
+                        value: 'up',
+                        label: '手台场强'
+                    },
+                    {
+                        value: 'down',
+                        label: '下行场强'
+                    }
+                ],
+                ssri: 'up',
+                legendLabel:'图例',
+                sdate:['2016-01-01', '2016-02-15']
                 
         }
     },
     mounted(){
+     this.createLegend();
      this.createFeature();
      this.initMap();
     },
     methods:{
-            createFeature () {
+            createLegend(){
+                let params = {
+                            krigingModel: 'exponential',//model还可选'gaussian','spherical'
+                            krigingSigma2: 0,
+                            krigingAlpha: 100,
+                            canvasAlpha: 0.5,//canvas图层透明度
+                            colors: ['#E3FFC6', '#0f0', '#00f', '#ff0', '#f00']
+                        }
+                let drawLabel = function (x, y, color, type, text, textSize) {
+                            var side = 3;
+                            ctx.beginPath();
+                            ctx.moveTo(x, y);
+                            ctx.lineTo(x + side, y - side);
+                            ctx.lineTo(x + side, y + side);
+                            ctx[type + 'Style'] = color;
+                            ctx.closePath();
+                            ctx[type]();
+                            ctx.font = textSize + "px Arial";
+                            ctx.fillStyle = "#000";
+                            ctx.fillText(text, x + side + 2, y + textSize / 2 - 2);
+                        }
+                
+                            
+                        var textOffsetHeight = 25,textHeight = 16;//文字与上部偏离，文字大小
+                        var offsetY = 15, offsetX = 10;//渐变矩阵偏离度
+                        var rectHeight = 70, rectWidth = 30;//渐变矩阵高和宽
 
+                        var canvas = document.createElement('canvas');
+                        canvas.style.marginBottom = "-5px";
+                        var ctx = canvas.getContext("2d");
+                        canvas.height = 140;
+                        canvas.width = 100;
+                        ctx.fillStyle = "#fff";
+                        ctx.fillRect(0, 0, canvas.width, canvas.height); //绘制底图
+                        ctx.font = "bold "+ textHeight + "px Arial";
+                        ctx.fillStyle = "#000";
+                        ctx.fillText(this.legendLabel, canvas.width / 2.6, textOffsetHeight);
+
+                        //绘制渐变矩形
+                        var lg = ctx.createLinearGradient(offsetX, textOffsetHeight + offsetY, offsetX, textHeight + textOffsetHeight + offsetY + rectHeight);
+                        var colorArray = params.colors;
+                        colorArray.forEach(function (v,n) {
+                            lg.addColorStop(n / colorArray.length, v);
+                        });
+                        ctx.fillStyle = lg;
+                        ctx.beginPath();
+                        ctx.fillRect(offsetX, textOffsetHeight + offsetY, rectWidth, rectHeight);
+                        ctx.fillStyle = "black";
+                        ctx.beginPath();
+                        ctx.fillRect(offsetX, textOffsetHeight + offsetY + rectHeight, rectWidth, rectHeight / 4);
+
+                        //绘制标签
+                        drawLabel(offsetX + rectWidth + 2, textOffsetHeight + offsetY, "#000", "fill", 0 + " dB", "12");
+                        drawLabel(offsetX + rectWidth + 2, textOffsetHeight + offsetY + rectHeight / 4, "#000", "fill", "-80 dB", "12");
+                        drawLabel(offsetX + rectWidth + 2, textOffsetHeight + offsetY + rectHeight / 2, "#000", "fill", "-90 dB", "12");
+                        drawLabel(offsetX + rectWidth + 2, textOffsetHeight + offsetY + rectHeight * 3 / 4, "#000", "fill", "-100 dB", "12");
+                        drawLabel(offsetX + rectWidth + 2, textOffsetHeight + offsetY + rectHeight, "#000", "fill", "-110 dB", "12");
+                        drawLabel(offsetX + rectWidth + 2, textOffsetHeight + offsetY + rectHeight * 5 / 4, "#000", "fill", "-150 dB", "12");
+                     let content = document.getElementById("legend");
+                     content.appendChild(canvas);
+
+            },
+            
+            createFeature () {
                   var source = new ol.source.Vector({})  
                         var heatData = [
                             {coordinates: [ 120.40, 30.19 ] ,properties: { u: 0.9,d:1 }},
@@ -148,17 +239,41 @@ export default {
     }
 </script>
 <style scoped>
-.row{
-    width: 100%; 
-    height:220px;
-    background:no-repeat no-repeat;;
-    background-size: 100%;  
+
+#control{
+    height:40px;
+    width: 435px;
+    position: absolute;
+    z-index: 999;
+    left: 10px;
+    top: 10px;
     background-color: #fff;
-    overflow-x: auto;
-    overflow-y: hidden;
+    white-space: nowrap;
+    text-align: center;
+    border-radius: 5px;
 }
-
-
+#control>ul{
+    margin-left: 5px;
+   text-align: center;
+   list-style: none;
+}
+#control>ul>li{
+    float: left;
+    padding-top: 5px;
+    margin-right: 10px;;
+}
+#control>ul>li:nth-child(2){
+padding-top: 10px;
+width: 100px;
+text-align: right;
+}
+#legend{
+    z-index: 999;
+    bottom: 20px;
+    right: 20px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    position: absolute;
+}
 
 </style>
 <style >
