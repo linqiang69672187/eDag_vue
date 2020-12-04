@@ -19,7 +19,7 @@ module.exports = {
         }
       },
       '/Handlers':{
-        target:'http://localhost:42680/Handlers',
+        target:'http://localhost:14551/Handlers',
         changeOrigin:true,
         pathRewrite:{
             '^/Handlers':''
@@ -33,10 +33,17 @@ module.exports = {
         }
       },
       '/WebGis':{
-        target:'http://127.0.0.1:42680/WebGis',
+        target:'http://127.0.0.1:6508/WebGis',
         changeOrigin:true,
         pathRewrite:{
             '^/WebGis':''
+        }
+      },
+      '/data':{
+        target:'http://10.8.59.253:8078/data',
+        changeOrigin:true,
+        pathRewrite:{
+            '^/data':''
         }
       },
     },

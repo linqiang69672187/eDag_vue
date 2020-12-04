@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>东方通信GIS指挥调度台</title>
+  </head>
+  <script type="text/javascript" src="./static/dispatchMsg.js"></script>
+  <script type="text/javascript" src="./static/OpenLayers/ol-debug.js"></script>
+  <script type="text/javascript" src="./static/OpenLayers/ol-View.js"></script>
+  <script type="text/javascript" src="./static/OpenLayers/ol-StreetMapLayer.js"></script>
+  <script type="text/javascript" src="./static/OpenLayers/ol-CoordinateBiasedAlgorithm.js"></script>
+  <script type="text/javascript" src="./static/OpenLayers/proj4/proj4.js""></script>
+  <body onselectstart="return false;">
+    <div id="app"></div>
+    <!-- built files will be auto injected -->
+  </body>
+</html>

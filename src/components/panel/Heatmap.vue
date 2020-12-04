@@ -10,7 +10,7 @@
            </li>
                <li>选择起始时间：</li>
                <li>
-                  <DatePicker :value="sdate" format="yyyy/MM/dd" type="daterange" placement="bottom-end" placeholder="Select date" style="width: 200px"></DatePicker>
+                  <DatePicker :value="sdate" format="yyyy/MM/dd" type="daterange" @on-change="loadHeatmapData" placement="bottom-end" placeholder="Select date" style="width: 200px"></DatePicker>
                </li>
            </ul>
           
@@ -21,6 +21,7 @@
     </div>
 </template>
 <script>
+import Vue from 'vue';
 import { Select,DatePicker   } from 'iview';
 
 export default {
@@ -49,19 +50,39 @@ export default {
         }
     },
     mounted(){
-        let date = new Date();
-        let tYear = date.getFullYear();
-        let m = dete.getMonth()+1 
+        let ndate = new Date();
+        let tYear = ndate.getFullYear();
+        let m = ndate.getMonth()+1 
         let tmonth = m.toString().length==1?"0"+m:m;
-        let tdate =  date.getDate();
+        let d =  ndate.getDate();
+        let tdate = d.toString().length==1?"0"+d:d;
         this.sdate.push(tYear+'-'+tmonth+'-'+'01');
         this.sdate.push(tYear+'-'+tmonth+'-'+tdate);
 
         this.createLegend();
         this.createFeature();
         this.initMap();
+        this.loadHeatmapData(this.sdate);
     },
     methods:{
+         
+            loadHeatmapData(date1){
+ 
+               let sdate=this.sdate[0]+'_'+this.sdate[1];
+                 Vue.axios.get('/Handlers/getHeatmapRssidata.ashx', { // ，/app/data/json/OnlineTerminalCountGroupByBS.json，/Handlers/MVCEasy.ashx，
+                            params: {
+                                type:this.ssri,
+                                sdate:sdate,                              
+                            }
+                          }).then((res) => {
+
+                                 
+                         
+                          }).catch((err) => {
+                          console.log(err)
+                           
+                   })   
+            },
             createLegend(){
                 let params = {
                             krigingModel: 'exponential',//model还可选'gaussian','spherical'
