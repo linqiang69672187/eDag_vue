@@ -4,25 +4,40 @@
        <div id="control">
            <ul>
                <li>  
-                   <Select v-model="ssri" style="width:100px">
+                   <Select v-model="ssri" @on-change="selectChange" style="width:100px" >
                       <Option v-for="item in cityList" :value="item.value" :key="item.value">{{ item.label }}</Option>
                    </Select>
            </li>
                <li>选择起始时间：</li>
                <li>
-                  <DatePicker :value="sdate" format="yyyy/MM/dd" type="daterange" @on-change="loadHeatmapData" placement="bottom-end" placeholder="Select date" style="width: 200px"></DatePicker>
+                  <DatePicker :value="sdate" format="yyyy-MM-dd" type="daterange" @on-change="loadHeatmapData" placement="bottom-end" placeholder="Select date" style="width: 200px"></DatePicker>
                </li>
+                <li>
+                 <Button  icon="ios-map" @click="changemap">主地图</Button>
+                </li>
            </ul>
           
        </div>
        <div id="legend">
 
        </div>
+<!--        
+      <div id="valuetable">
+          <Table border :columns="columns5" :data="rssiData"></Table>
+          <Page :total="100" />
+       </div> -->
+          <notice ref="notice"></notice>
+          <Spin fix  v-if="spinShow">
+                <Icon type="ios-loading" size=18 class="demo-spin-icon-load"></Icon>
+                <div>Loading</div>
+          </Spin>
+       
     </div>
 </template>
 <script>
 import Vue from 'vue';
-import { Select,DatePicker   } from 'iview';
+import { Select,DatePicker,Table,Page,Spin,Icon,Button } from 'iview';
+import notice from "@/components/control/notices";
 
 export default {
     data(){
@@ -35,24 +50,54 @@ export default {
                 htmap:null,
                  cityList: [
                     {
-                        value: 'up',
+                        value: 'MS',
                         label: '手台场强'
                     },
                     {
-                        value: 'down',
-                        label: '下行场强'
+                        value: 'UI',
+                        label: '上行场强'
                     }
                 ],
-                ssri: 'up',
+                ssri: 'MS',
                 legendLabel:'图例',
-                sdate:[]
+                sdate:[],
+                columns5: [
+                    {
+                        title: 'ISSI',
+                        key: 'issi',
+                        sortable: true
+                    },
+                    {
+                        title: '位置',
+                        key: 'co'
+                    },
+                    {
+                        title: '手台场强',
+                        key: 'MS',
+                        sortable: true
+                    },
+                    {
+                        title: '下行场强',
+                        key: 'UI'
+                    }
+                ],
+                rssiData:[],
+                loadingvue:null, 
+                spinShow: true, 
                 
         }
     },
+    created(){
+         
+    },
+    components:{
+        notice,
+    },
     mounted(){
+        this.initMap();
         let ndate = new Date();
         let tYear = ndate.getFullYear();
-        let m = ndate.getMonth()+1 
+        let m = ndate.getMonth()+1; //+1
         let tmonth = m.toString().length==1?"0"+m:m;
         let d =  ndate.getDate();
         let tdate = d.toString().length==1?"0"+d:d;
@@ -60,27 +105,30 @@ export default {
         this.sdate.push(tYear+'-'+tmonth+'-'+tdate);
 
         this.createLegend();
-        this.createFeature();
-        this.initMap();
+       
         this.loadHeatmapData(this.sdate);
     },
-    methods:{
-         
+    methods:{  
+        
             loadHeatmapData(date1){
- 
-               let sdate=this.sdate[0]+'_'+this.sdate[1];
+               this.sdate =date1; 
+               let sdate=date1[0]+'_'+date1[1];
+           //    this.loadingvue = this.$loading({text: 'loading',});
+                this.spinShow=true;
+                let _this =this;
                  Vue.axios.get('/Handlers/getHeatmapRssidata.ashx', { // ，/app/data/json/OnlineTerminalCountGroupByBS.json，/Handlers/MVCEasy.ashx，
                             params: {
                                 type:this.ssri,
                                 sdate:sdate,                              
                             }
                           }).then((res) => {
-
-                                 
-                         
+                                 _this.createFeature(res.data);  
+                                 _this.rssiData =  res.data;
+                            _this.spinShow=false;
                           }).catch((err) => {
                           console.log(err)
-                           
+                           _this.spinShow=false;
+                      
                    })   
             },
             createLegend(){
@@ -146,96 +194,105 @@ export default {
 
             },
             
-            createFeature () {
-                  var source = new ol.source.Vector({})  
-                        var heatData = [
-                            {coordinates: [ 120.40, 30.19 ] ,properties: { u: 0.9,d:1 }},
-                            { coordinates: [ 120.30, 30.60 ] ,properties: { u: 0.9,d:1 }},
-                            { coordinates: [ 120.30, 30.60 ] ,properties: { u: 0.9,d:1}},
-                            { coordinates: [ 120.30, 30.60 ] ,properties: { u: 0.9,d:1}},
-                            { coordinates: [ 120.30, 30.60 ] ,properties: { u: 0.9,d:1}},
-                            { coordinates: [ 120.30, 30.60 ] ,properties: { u: 0.9,d:1}},
-                            { coordinates: [ 120.30, 30.60 ] ,properties: { u: 0.9,d:1}},
-                            { coordinates: [ 120.30, 30.60 ] ,properties: { u: 0.9,d:1}},
-                            { coordinates: [ 120.30, 30.60 ] ,properties: { u: 0.9,d:1}},
-                            { coordinates: [ 120.30, 30.60 ] ,properties: { u: 0.9,d:1}},
-                            { coordinates: [ 120.30, 30.60 ] ,properties: { u: 0.9,d:1}},
-                            { coordinates: [ 120.30, 30.60 ] ,properties: { u: 0.9,d:1}},             
-                            { coordinates: [ 120.214350, 30.3423 ] ,properties: { u: 0.9,d:1}},
-                            { coordinates: [ 120.45656, 30.4545 ] ,properties: { u: 0.9,d:1}},
-                            { coordinates: [ 120.78684, 30.1235 ] ,properties: { u: 0.9,d:1}},
-                            { coordinates: [ 120.43543, 30.4378 ] ,properties: { u: 0.9,d:1}},
-                            { coordinates: [ 120.506, 30.234 ] ,properties: { u: 0.9,d:1}},
-                            { coordinates: [ 120.9087, 30.45345 ] ,properties: { u: 0.9,d:1}},
-                            { coordinates: [ 120.8764, 30.1234 ] ,properties: { u: 0.9,d:1}},
-                            { coordinates: [ 120.4753, 30.948 ] ,properties: { u: 0.9,d:1}},
-                            { coordinates: [ 120.10, 30.789 ] ,properties: { u: 0.9,d:1}}
-                        ];
-
-                         heatData.forEach(element=>{
-                               let geom = new ol.geom.Point(ol.proj.fromLonLat(element.coordinates));
-                               let feature = new ol.Feature(geom);
-                               feature.u = element.u;
-                               feature.d = element.d;
+            createFeature (data) {
+                       let source = this.htmap.getSource();
+                           source.clear();
+                         data.forEach(element=>{
+                               let geom = new ol.geom.Point(ol.proj.fromLonLat(element.co));
+                               let feature = new ol.Feature({
+                                   geometry: geom,
+                                   MS : element.MS,
+                                   UI : element.UI,
+                                  issi : element.issi,
+                               });
+                               
+                               let Rssi = this.ssri=="MS"?parseInt(element.MS):parseInt(element.UI);
+                               let color=this.fillColor(Rssi)
                                feature.setStyle(
                                     new ol.style.Style({
                                         image: new ol.style.Circle({
-                                            radius: 20,
+                                            radius: 5,
                                             fill: new ol.style.Fill({
-                                                color: '#999999'
+                                                color: color
                                             }),
                                         })
                                     })
                                 );
-                              source.addFeature(feature);
-                         })
-                    /*
-                     var features = new ol.format.GeoJSON().readFeatures(heatData, {
-                             dataProjection: 'EPSG:4326',
-                             featureProjection: 'EPSG:3857'
-                         });
-
-                     features.forEach(element => {
-                    element.setStyle(
-                            new ol.style.Style({
-                                 image: new ol.style.Circle({
-                                     radius: 20,
-                                     fill: new ol.style.Fill({
-                                         color: '#3399CC'
-                                     }),
-                                 })
-                             })
-                        );
-
-                     });
-
-               */
-                      this.htmap = new ol.layer.Vector({
-                        source: source,
+                             source.addFeature(feature);
+                         })                             
+                }, 
+            fillColor(Rssi){
+                let r=255,g=255,b=255;
+                if(0<=Rssi && Rssi<=80){
+                     r = parseInt(255-Rssi/80*255);
+                     g = 255;
+                     b = parseInt(255-Rssi/80*255);
+               
+                };
+                if(80<Rssi&&Rssi<=90){
+                     r = 0;
+                     g =  parseInt(255-(Rssi-80)/10*255);
+                     b = parseInt((Rssi-80)/10*255);
                        
-                    });   
-                    
+                };
+               if(90<Rssi&&Rssi<=100){
+                     r =  parseInt((Rssi-90)/10*255);
+                     g =  parseInt((Rssi-90)/10*255);
+                     b =  parseInt(255-(Rssi-90)/100*255);
+                       
+                };
+               if(100<Rssi&&Rssi<=110){
+                     r =  255;
+                     g =  parseInt(255-(Rssi-100)/10*255);
+                     b = 0;
+                       
+                };
+                if(110<Rssi&&Rssi<=150){
+                     r =  parseInt(255-(Rssi-110)/40*255);
+                     g =  0;
+                     b =  0;
+                       
+                };
 
-                },  
+                return 'rgb('+r+','+g+','+b+')';
+              
+
+            },
+            selectChange(){
+                debugger;
+                console.info(this.sdate);
+               //this.createFeature(this.rssiData);
+               //this.loadingvue.close();
+                this.loadHeatmapData(this.sdate);
+              // this.$Spin.show();
+            //    this.spinShow=true;
+            //    let features = this.htmap.getSource().getFeatures();
+          
+            //     features.forEach(element=>{
+            //                    let Rssi = this.ssri=="MS"?parseInt(element.get('MS')):parseInt(element.get('UI')); 
+            //                    let color= this.fillColor(Rssi)
+            //                    element.setStyle(
+            //                         new ol.style.Style({
+            //                             image: new ol.style.Circle({
+            //                                 radius: 5,
+            //                                 fill: new ol.style.Fill({
+            //                                     color: color
+            //                                 }),
+            //                             })
+            //                         })
+            //                     );
+                             
+            //              })  
+     
+            //   //  this.$Spin.hide();
+            //  this.spinShow=false;
+
+            },
+            changemap(){
+                this.$emit('changemap','Mainmap')
+            },
             initMap() {
-            //   var vector = new ol.layer.Heatmap({
-            //         source: new ol.source.Vector({
-            //             url: '/data/kml/2012_Earthquakes_Mag5.kml',
-            //             format: new ol.format.KML({
-            //             extractStyles: false,
-            //             }),
-            //         }),
-            //         blur: 11,
-            //         radius: 30,
-            //         weight: function (feature) {
-            //             // 2012_Earthquakes_Mag5.kml stores the magnitude of each earthquake in a
-            //             // standards-violating <magnitude> tag in each Placemark.  We extract it from
-            //             // the Placemark's name instead.
-            //             var name = feature.get('name');
-            //             var magnitude = parseFloat(name.substr(2));
-            //             return magnitude - 5;
-            //         },
-            //         });
+          
 
                 var GISTYPE = useprameters.GISTYPE.toLowerCase();
                 var viewParam = {
@@ -260,8 +317,42 @@ export default {
             
                 var offlineMapLayerParams = createBaseMapParameter(GISTYPE);
                 var streetMapLayer = createStreetMapLayer(this.map, "offlineMapLayer", offlineMapLayerParams);//创建街景图
+                var source = new ol.source.Vector({}) ;
+                this.htmap = new ol.layer.Vector({
+                            source: source,
+                        
+                        });   
+                this.map.addLayer(this.htmap);  
+                let _this=this;
             
-                this.map.addLayer(this.htmap);
+                const dblClickInteraction = this.map
+                            .getInteractions()
+                            .getArray()
+                            .find(interaction => {
+                            return interaction instanceof ol.interaction.DoubleClickZoom;
+                            });
+                this.map.removeInteraction(dblClickInteraction);
+                this.map.on('dblclick', function (evt) {
+                  //  point_overlay.setPosition([0, 0]);
+                   // $(".zq1").hide();
+                  //  $(".table .localtd").removeClass("localtd"); //移出定位
+                     var feature = _this.map.forEachFeatureAtPixel(evt.pixel,
+                        function (feature) {
+                            return feature;
+                        });
+                    if (feature) {
+                     //   var coordinates = feature.getGeometry().getCoordinates();
+                      //  var pixel = map.getPixelFromCoordinate(coordinates);
+
+
+                        let MS = feature.get('MS');
+                        let UI = feature.get("UI");
+                        let issi = feature.get("issi");  
+    
+                        _this.$refs.notice.info("场强信息","终端号码："+issi+"<br/>手台场强："+MS+"<br/>上行场强："+UI);
+                    }
+                });
+                
             },
         },
 
@@ -271,11 +362,11 @@ export default {
 
 #control{
     height:40px;
-    width: 435px;
+    width: 545px;
     position: absolute;
     z-index: 999;
-    left: 10px;
-    top: 10px;
+    right: 20px;
+    top: 60px;
     background-color: #fff;
     white-space: nowrap;
     text-align: center;
@@ -297,14 +388,47 @@ width: 100px;
 text-align: right;
 }
 #legend{
-    z-index: 999;
-    bottom: 20px;
+    z-index: 998;
+    top: 110px;
     right: 20px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
     position: absolute;
 }
-
+#valuetable{
+    z-index: 999;
+    left: 10px;
+    top: 60px;
+    width: 435px;
+    height: 500px;
+    position: absolute;
+    background-color: #fff;
+}
+.demo-spin-icon-load{
+        animation: ani-demo-spin 1s linear infinite;
+    }
+    @keyframes ani-demo-spin {
+        from { transform: rotate(0deg);}
+        50%  { transform: rotate(180deg);}
+        to   { transform: rotate(360deg);}
+    }
+    .demo-spin-col{
+        height: 100px;
+        position: relative;
+        border: 1px solid #eee;
+    }
+    #backMainMap{
+        height: 40px;
+        width: 40px;
+        background-color: red;
+        border-radius: 20px;
+        z-index: 998;
+        bottom: 20px;
+        right: 20px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        position: absolute;
+    }
+    
 </style>
 <style >
-
+  
 </style>

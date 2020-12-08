@@ -7,22 +7,28 @@
         </QRCode>
         <div id="main"></div>
   
-       
+       <Modal v-model="modal11" fullscreen title="Fullscreen Modal">
+        <div><Heatmap></Heatmap></div>
+      </Modal>
+      <Button @click="modal11 = true" >全屏</Button>
     </div>
 
 </template>
 <script>
 import store from "@/vuex/store"
 import {INCREASE} from '@/vuex/modul_types'
-import { Button, Table } from 'iview';
+import { Button, Table,Modal} from 'iview';
+import Heatmap from "@/components/panel/Heatmap"
 
 import conmonjs from "@/mixin/common_hi"
 import annother from "@/mixin/annother"
 import QRCode from "@/components/QRCode.vue"
 
+
 export default {
     data(){
        return{
+           modal11: false,
             news:'aaaa',
             name:'lq',
              columns2: [
@@ -135,8 +141,9 @@ export default {
     components:{
         Button,
         Table,
-    
-        QRCode
+        Heatmap,
+        QRCode,
+   
     },
     methods:{
         increase:function(val){

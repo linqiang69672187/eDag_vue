@@ -1,10 +1,10 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import index from '@/components/index.vue'
-import News from '@/components/news.vue'
+import Mainmap from '@/components/panel/Mainmap'
 import test from '@/components/test.vue'
-import heatmap from '@/components/panel/heatmap.vue'
-
+import heatmap from '@/components/panel/Heatmap.vue'
+import table from '@/components/control/tables.vue'
 Vue.use(Router)
 
 export default new Router({
@@ -15,9 +15,9 @@ export default new Router({
       component: index
     },
     {
-      path: '/news',
-      name: 'news',
-      component: News
+      path: '/Mainmap',
+      name: 'Mainmap',
+      component: Mainmap
     },
     {
       path: '/test',
@@ -28,6 +28,11 @@ export default new Router({
       path: '/heatmap',
       name: 'heatmap',
       component: heatmap
+    },
+    {
+      path: '/table',
+      name: 'table',
+      component: table
     },
   ]
 })

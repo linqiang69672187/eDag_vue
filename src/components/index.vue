@@ -26,12 +26,21 @@
         <banner ref="banner" :isshowmini="isshowmini" @Bannerselectedchange='Bannerselectedchange'></banner>
     </div>
     <div>
-        <div  id="map"></div>
+     <transition name="slide-fade">
+        <div  v-show="showMap ==='Mainmap'">
+        <Mainmap @changemap="changeMap" ></Mainmap>
         <MapToolbox ref="maptoolbox" @fullscreen="fullscreen"></MapToolbox>
+        <LeftToolbox  ref="leftToolbox" @daiplate="cldaiplate" :style="{bottom:dmenuszie}"></LeftToolbox>
+         </div>
+      </transition>
+        <transition name="slide-fade">
+        <Heatmap @changemap="changeMap" v-if="showMap =='Heatmap'"></Heatmap>
+        </transition>
+ 
         <!--<Map  class="map" v-contextmenu:contextmenu move-type="0"></Map>
         <Callbox :class="{hidedmenu}"></Callbox> 地图上呼叫按钮-->
         <notice ref="notice"></notice>
-        <LeftToolbox ref="leftToolbox" @daiplate="cldaiplate" :style="{bottom:dmenuszie}"></LeftToolbox>
+
     </div>
     <div class="isSuccess">
         <!-- <el-button @click="ocxRegStatus=!ocxRegStatus"> toggle</el-button> -->
@@ -75,6 +84,8 @@ import notice from "@/components/control/notices"
 import LeftToolbox from "@/components/control/LeftToolbox"
 import OCX from "@/components/OCX"
 import languageset from '@/mixin/languageset'
+import Heatmap from '@/components/panel/Heatmap'
+import Mainmap from '@/components/panel/Mainmap'
 
 export default {
     watch:{
@@ -129,7 +140,9 @@ export default {
             SMSEnable:true,    //短信权限
             PullUp_ControlEnable:true, //GPS上拉权限
             GPS_ControlEnable:true,    //GPS上报权限
-            loadingvue:null,       
+            loadingvue:null,
+            showMap:'Mainmap',   //显示什么地图   
+                
         }
     },
     mixins:[languageset,],
@@ -191,6 +204,9 @@ export default {
         Callbox,
         notice,
         LeftToolbox,
+        Heatmap,
+        Mainmap
+    
     },
     methods:{
 
@@ -434,6 +450,10 @@ export default {
                            
                    })
                     
+        },
+        changeMap(mapvalue){
+            debugger;
+            this.showMap=mapvalue;
         } 
        
     }
@@ -459,13 +479,7 @@ export default {
     width: 100%;
     text-align: center;
 }
-  #map {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-    }
+  
   #main {
     width: auto;
     height: 100%;
@@ -514,7 +528,19 @@ export default {
     -webkit-transition:all 0.6s; /* Safari and Chrome */
      -o-transition:all 0.6s; /* Opera */
   }
- 
+ /* 可以设置不同的进入和离开动画 */
+/* 设置持续时间和动画函数 */
+    .slide-fade-enter-active {
+    transition: all .3s ease;
+    }
+    .slide-fade-leave-active {
+    transition: all .8s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+    }
+    .slide-fade-enter, .slide-fade-leave-to
+    /* .slide-fade-leave-active for below version 2.1.8 */ {
+    transform: translateX(10px);
+    opacity: 0;
+    }
 </style>
 <style>
  .v-contextmenu--default,.v-contextmenu{
