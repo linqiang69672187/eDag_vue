@@ -51,3 +51,9 @@ new Vue({
   template: '<App/>',
   store
 })
+
+Vue.config.errorHandler = function (err, vm, info) {
+  console.error('error---', err)
+  console.info('vm---', vm)
+  console.info('info---', info)
+}

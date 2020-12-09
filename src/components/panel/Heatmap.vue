@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="divmap" :class="{minimap}">
 
        <div id="control">
            <ul>
@@ -82,9 +82,9 @@ export default {
                     }
                 ],
                 rssiData:[],
-                loadingvue:null, 
-                spinShow: true, 
-                
+         
+                spinShow: false, 
+                minimap:false,
         }
     },
     created(){
@@ -94,26 +94,14 @@ export default {
         notice,
     },
     mounted(){
-        this.initMap();
-        let ndate = new Date();
-        let tYear = ndate.getFullYear();
-        let m = ndate.getMonth()+1; //+1
-        let tmonth = m.toString().length==1?"0"+m:m;
-        let d =  ndate.getDate();
-        let tdate = d.toString().length==1?"0"+d:d;
-        this.sdate.push(tYear+'-'+tmonth+'-'+'01');
-        this.sdate.push(tYear+'-'+tmonth+'-'+tdate);
-
-        this.createLegend();
-       
-        this.loadHeatmapData(this.sdate);
+      
     },
     methods:{  
         
             loadHeatmapData(date1){
                this.sdate =date1; 
                let sdate=date1[0]+'_'+date1[1];
-           //    this.loadingvue = this.$loading({text: 'loading',});
+         
                 this.spinShow=true;
                 let _this =this;
                  Vue.axios.get('/Handlers/getHeatmapRssidata.ashx', { // ，/app/data/json/OnlineTerminalCountGroupByBS.json，/Handlers/MVCEasy.ashx，
@@ -262,7 +250,7 @@ export default {
                 debugger;
                 console.info(this.sdate);
                //this.createFeature(this.rssiData);
-               //this.loadingvue.close();
+              
                 this.loadHeatmapData(this.sdate);
               // this.$Spin.show();
             //    this.spinShow=true;
@@ -289,11 +277,16 @@ export default {
 
             },
             changemap(){
-                this.$emit('changemap','Mainmap')
+                this.$emit('changemap','Mainmap');
+                this.minimap=true;
             },
+            fullmap(){
+               
+                this.minimap=false;
+             },
             initMap() {
           
-
+                this.createLegend();
                 var GISTYPE = useprameters.GISTYPE.toLowerCase();
                 var viewParam = {
                     "lo": useprameters.PGIS_Center_lo,//中心点
@@ -427,7 +420,18 @@ text-align: right;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
         position: absolute;
     }
+    .minimap{
+       transform: translateX(3000px);
     
+       z-index: -1;
+    }
+    .divmap{
+      width: 100%;
+       transition:all  1;
+    -moz-transition:all  1s; /* Firefox 4 */
+    -webkit-transition:all  1s; /* Safari and Chrome */
+    -o-transition:all  1s; /* Opera */
+    }
 </style>
 <style >
   

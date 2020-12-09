@@ -26,20 +26,18 @@
         <banner ref="banner" :isshowmini="isshowmini" @Bannerselectedchange='Bannerselectedchange'></banner>
     </div>
     <div>
-     <transition name="slide-fade">
-        <div  v-show="showMap ==='Mainmap'">
-        <Mainmap @changemap="changeMap" ></Mainmap>
-        <MapToolbox ref="maptoolbox" @fullscreen="fullscreen"></MapToolbox>
-        <LeftToolbox  ref="leftToolbox" @daiplate="cldaiplate" :style="{bottom:dmenuszie}"></LeftToolbox>
-         </div>
-      </transition>
-        <transition name="slide-fade">
-        <Heatmap @changemap="changeMap" v-if="showMap =='Heatmap'"></Heatmap>
-        </transition>
- 
-        <!--<Map  class="map" v-contextmenu:contextmenu move-type="0"></Map>
-        <Callbox :class="{hidedmenu}"></Callbox> 地图上呼叫按钮-->
-        <notice ref="notice"></notice>
+
+    <div>
+    <Mainmap ref="Mainmap" @changemap="changeMap" ></Mainmap>
+    <MapToolbox ref="maptoolbox" @fullscreen="fullscreen"></MapToolbox>
+    <LeftToolbox  ref="leftToolbox" @daiplate="cldaiplate" :style="{bottom:dmenuszie}"></LeftToolbox>
+    </div>
+    <Heatmap ref="Heatmap" @changemap="changeMap" ></Heatmap>
+    
+
+    <!--<Map  class="map" v-contextmenu:contextmenu move-type="0"></Map>
+    <Callbox :class="{hidedmenu}"></Callbox> 地图上呼叫按钮-->
+    <notice ref="notice"></notice>
 
     </div>
     <div class="isSuccess">
@@ -141,7 +139,7 @@ export default {
             PullUp_ControlEnable:true, //GPS上拉权限
             GPS_ControlEnable:true,    //GPS上报权限
             loadingvue:null,
-            showMap:'Mainmap',   //显示什么地图   
+         
                 
         }
     },
@@ -235,6 +233,7 @@ export default {
         },
         listenchangeDmenu:function(isshow){
            this.hidedmenu=!isshow;
+           debugger;
            (isshow)?this.dmenuszie='260px !important':this.dmenuszie='10px !important'
           // console.info(isshow+this.dmenuszie)
         },
@@ -397,11 +396,13 @@ export default {
                
         },
         init:function(){
+            this.loadingvue.close();
             this.$refs.banner.updateuseprameters();
             this.$refs.dmenu.updateuseprameters();
             this.$refs.leftToolbox.updateuseprameters();
+            this.$refs.Heatmap.initMap();
             this.updateuseprameters();
-            this.loadingvue.close();
+           
             if (this.get_language()!='zh-CN'){
                 this.setlanguage();
                 this.$refs.banner.setlanguage();
@@ -453,7 +454,17 @@ export default {
         },
         changeMap(mapvalue){
             debugger;
-            this.showMap=mapvalue;
+            switch (mapvalue) {
+                case "Heatmap":
+                    this.$refs.Heatmap.fullmap();
+                    break;
+                 case "Mainmap":
+                    this.$refs.Mainmap.fullmap();
+                    break;
+                default:
+                    break;
+            }
+            
         } 
        
     }
@@ -528,19 +539,6 @@ export default {
     -webkit-transition:all 0.6s; /* Safari and Chrome */
      -o-transition:all 0.6s; /* Opera */
   }
- /* 可以设置不同的进入和离开动画 */
-/* 设置持续时间和动画函数 */
-    .slide-fade-enter-active {
-    transition: all .3s ease;
-    }
-    .slide-fade-leave-active {
-    transition: all .8s cubic-bezier(1.0, 0.5, 0.8, 1.0);
-    }
-    .slide-fade-enter, .slide-fade-leave-to
-    /* .slide-fade-leave-active for below version 2.1.8 */ {
-    transform: translateX(10px);
-    opacity: 0;
-    }
 </style>
 <style>
  .v-contextmenu--default,.v-contextmenu{
