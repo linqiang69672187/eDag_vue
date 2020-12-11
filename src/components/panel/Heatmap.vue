@@ -1,5 +1,5 @@
 <template>
-    <div class="divmap" :class="{minimap}">
+    <div>
 
        <div id="control">
            <ul>
@@ -25,8 +25,9 @@
       <div id="valuetable">
           <Table border :columns="columns5" :data="rssiData"></Table>
           <Page :total="100" />
-       </div> -->
-          <notice ref="notice"></notice>
+       </div>
+       -->
+           <notice ref="notice"></notice>
           <Spin fix  v-if="spinShow">
                 <Icon type="ios-loading" size=18 class="demo-spin-icon-load"></Icon>
                 <div>Loading</div>
@@ -36,7 +37,7 @@
 </template>
 <script>
 import Vue from 'vue';
-import { Select,DatePicker,Table,Page,Spin,Icon,Button } from 'iview';
+import { Select,DatePicker,Page,Spin,Icon,Button } from 'iview';
 import notice from "@/components/control/notices";
 
 export default {
@@ -84,7 +85,7 @@ export default {
                 rssiData:[],
          
                 spinShow: false, 
-                minimap:false,
+           
         }
     },
     created(){
@@ -94,7 +95,7 @@ export default {
         notice,
     },
     mounted(){
-      
+      this.initMap();
     },
     methods:{  
         
@@ -277,25 +278,22 @@ export default {
 
             },
             changemap(){
-                this.$emit('changemap','Mainmap');
-                this.minimap=true;
+               this.$router.push({name:'index'}) 
             },
-            fullmap(){
-               
-                this.minimap=false;
-             },
+         
             initMap() {
           
                 this.createLegend();
-                var GISTYPE = useprameters.GISTYPE.toLowerCase();
+                var GISTYPE =window.parent.useprameters.GISTYPE.toLowerCase();
                 var viewParam = {
-                    "lo": useprameters.PGIS_Center_lo,//中心点
-                    "la": useprameters.PGIS_Center_la,//中心点
-                    "maxLevel": useprameters.maxLevel,//最大层级
-                    "minLevel": useprameters.minLevel,//最小层级
-                    "currentLevel": useprameters.maxLevel-2//显示层级
+                    "lo":window.parent.useprameters.PGIS_Center_lo,//中心点
+                    "la": window.parent.useprameters.PGIS_Center_la,//中心点
+                    "maxLevel": window.parent.useprameters.maxLevel,//最大层级
+                    "minLevel": window.parent.useprameters.minLevel,//最小层级
+                    "currentLevel": window.parent.useprameters.maxLevel-2//显示层级
                 }
-                var view = createView(GISTYPE, viewParam);//创建视图
+                console.info(viewParam);
+                var view = window.parent.createView(GISTYPE, viewParam);//创建视图
                 this.map = new ol.Map({
                     target:  this.$el,
                     // 设置地图控件，默认的三个控件都不显示
@@ -308,8 +306,8 @@ export default {
                    
                 }); 
             
-                var offlineMapLayerParams = createBaseMapParameter(GISTYPE);
-                var streetMapLayer = createStreetMapLayer(this.map, "offlineMapLayer", offlineMapLayerParams);//创建街景图
+                var offlineMapLayerParams = window.parent.createBaseMapParameter(GISTYPE);
+                var streetMapLayer = window.parent.createStreetMapLayer(this.map, "offlineMapLayer", offlineMapLayerParams);//创建街景图
                 var source = new ol.source.Vector({}) ;
                 this.htmap = new ol.layer.Vector({
                             source: source,
@@ -359,7 +357,7 @@ export default {
     position: absolute;
     z-index: 999;
     right: 20px;
-    top: 60px;
+    top: 10px;
     background-color: #fff;
     white-space: nowrap;
     text-align: center;
@@ -382,7 +380,7 @@ text-align: right;
 }
 #legend{
     z-index: 998;
-    top: 110px;
+    bottom: 10px;
     right: 20px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
     position: absolute;
@@ -420,18 +418,8 @@ text-align: right;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
         position: absolute;
     }
-    .minimap{
-       transform: translateX(3000px);
-    
-       z-index: -1;
-    }
-    .divmap{
-      width: 100%;
-       transition:all  1;
-    -moz-transition:all  1s; /* Firefox 4 */
-    -webkit-transition:all  1s; /* Safari and Chrome */
-    -o-transition:all  1s; /* Opera */
-    }
+
+     
 </style>
 <style >
   

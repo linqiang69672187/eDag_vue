@@ -100,3 +100,42 @@ function displaypolicelistsdiv(){
      window.vue_index.init();
      window.vue_index.updatelola();
  },3000)
+
+
+ function testMethod() {
+    var element = document.getElementById('planPanel');
+    var content = document.getElementById('heatmap').firstChild;
+    
+    if (element == null || element == undefined) {
+        jsPanel.create({
+            id: 'planPanel',
+            theme: 'primary',
+            headerTitle: "热力图",
+            headerControls: {
+                maximize: 'remove'
+            },
+            contentSize: {
+                width: 1000,
+                height: 500
+            },
+            contentOverflow: 'hidden',
+            content: content,
+            callback: function () {
+                this.content.style.padding = '0px';
+               // userPlanManager.addPlanFeatures();
+            }
+        });
+
+        // 定时刷新
+        var handler = setInterval(function () {
+       //     userPlanManager.refresh(issi);
+        }, 10000);
+
+        // 关闭面板
+        var closed = function (event) {
+        //    userPlanManager.removeFeatures();
+            window.clearInterval(handler);
+        }
+        document.addEventListener('jspanelclosed', closed, false);
+    }
+}

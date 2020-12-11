@@ -12,7 +12,11 @@ export default new Router({
     {
       path: '/',
       name: 'index',
-      component: index
+      component: index,
+      meta: {
+        keepAlive: true // 需要被缓存
+      }
+  
     },
     {
       path: '/Mainmap',
@@ -27,7 +31,10 @@ export default new Router({
     {
       path: '/heatmap',
       name: 'heatmap',
-      component: heatmap
+      component: heatmap,
+      meta: {
+        keepAlive: true // 需要被缓存
+      }
     },
     {
       path: '/table',

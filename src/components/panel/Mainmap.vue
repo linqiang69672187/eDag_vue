@@ -1,7 +1,6 @@
 <template>
- <div class="divmap" :class="{minimap}">
+ <div >
     <div  id="map"></div>
-    <button class="Rssi" @click="changemap">查看场强</button>
  </div>
 
 </template>
@@ -12,7 +11,7 @@
 export default {
     data(){
        return{
-         minimap:true,
+     
 
            
        }
@@ -31,15 +30,9 @@ export default {
    
     },
     methods:{
-         changemap(){
-                this.$emit('changemap','Heatmap');
-                this.minimap=true;
-         },
-         fullmap(){
-               
-                this.minimap=false;
-         },
-         
+        createrheatmap(){
+
+        }
     }
 }
 </script>
@@ -51,23 +44,9 @@ export default {
         width: 100%;
         height: 100%;
     }
-.Rssi{
-    bottom: 130px;
-    right: 130px;;
+.bt{
     position: absolute;
-    cursor: pointer;
+    bottom: 300px;
+    right: 300px;
 }
- .minimap{
-      transform: translateX(3000px);
-       opacity: 0;
-       z-index: -1;
-       
-    }
-    .divmap{
-        width:100%;
-       transition:all  1;
-    -moz-transition:all  1s; /* Firefox 4 */
-    -webkit-transition:all  1s; /* Safari and Chrome */
-    -o-transition:all  1s; /* Opera */
-    }
 </style>

@@ -27,14 +27,12 @@
     </div>
     <div>
 
-    <div>
+    <div >
     <Mainmap ref="Mainmap" @changemap="changeMap" ></Mainmap>
     <MapToolbox ref="maptoolbox" @fullscreen="fullscreen"></MapToolbox>
     <LeftToolbox  ref="leftToolbox" @daiplate="cldaiplate" :style="{bottom:dmenuszie}"></LeftToolbox>
     </div>
-    <Heatmap ref="Heatmap" @changemap="changeMap" ></Heatmap>
-    
-
+ 
     <!--<Map  class="map" v-contextmenu:contextmenu move-type="0"></Map>
     <Callbox :class="{hidedmenu}"></Callbox> 地图上呼叫按钮-->
     <notice ref="notice"></notice>
@@ -82,7 +80,6 @@ import notice from "@/components/control/notices"
 import LeftToolbox from "@/components/control/LeftToolbox"
 import OCX from "@/components/OCX"
 import languageset from '@/mixin/languageset'
-import Heatmap from '@/components/panel/Heatmap'
 import Mainmap from '@/components/panel/Mainmap'
 
 export default {
@@ -139,7 +136,8 @@ export default {
             PullUp_ControlEnable:true, //GPS上拉权限
             GPS_ControlEnable:true,    //GPS上报权限
             loadingvue:null,
-         
+            hideheatmap:false,
+           
                 
         }
     },
@@ -202,9 +200,7 @@ export default {
         Callbox,
         notice,
         LeftToolbox,
-        Heatmap,
-        Mainmap
-    
+        Mainmap,
     },
     methods:{
 
@@ -400,7 +396,7 @@ export default {
             this.$refs.banner.updateuseprameters();
             this.$refs.dmenu.updateuseprameters();
             this.$refs.leftToolbox.updateuseprameters();
-            this.$refs.Heatmap.initMap();
+            
             this.updateuseprameters();
            
             if (this.get_language()!='zh-CN'){
@@ -452,23 +448,11 @@ export default {
                    })
                     
         },
-        changeMap(mapvalue){
-            debugger;
-            switch (mapvalue) {
-                case "Heatmap":
-                    this.$refs.Heatmap.fullmap();
-                    break;
-                 case "Mainmap":
-                    this.$refs.Mainmap.fullmap();
-                    break;
-                default:
-                    break;
-            }
-            
+        
         } 
        
     }
-}
+
 </script>
 <style scoped>
 .isSuccess{
@@ -539,6 +523,8 @@ export default {
     -webkit-transition:all 0.6s; /* Safari and Chrome */
      -o-transition:all 0.6s; /* Opera */
   }
+
+
 </style>
 <style>
  .v-contextmenu--default,.v-contextmenu{
