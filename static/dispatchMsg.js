@@ -106,6 +106,7 @@ function displaypolicelistsdiv(){
     var element = document.getElementById('planPanel');
     var content = document.getElementById('heatmap').firstChild;
     
+
     if (element == null || element == undefined) {
         jsPanel.create({
             id: 'planPanel',
@@ -138,4 +139,55 @@ function displaypolicelistsdiv(){
         }
         document.addEventListener('jspanelclosed', closed, false);
     }
+}
+
+function heatmapwork(data){
+
+        let worker = new SharedWorker('./static/heatmapHandler.js');
+        worker.postMessage(data.data);
+       worker.addEventListener('message',function(e){
+            alert(e);
+            
+        },false);
+
+        return;
+        let _this =this;
+                
+        this.worker = this.$worker.run(n => {
+            debugger;
+            importScripts("ol-debug.js")
+            let source = new ol.source.Vector({}) ;    
+            data.forEach(element=>{
+                    let geom = new ol.geom.Point(ol.proj.fromLonLat(element.co));
+                    let feature = new ol.Feature({
+                        geometry: geom,
+                        MS : element.MS,
+                        UI : element.UI,
+                        issi : element.issi,
+                    });
+                    
+                    let Rssi = this.ssri=="MS"?parseInt(element.MS):parseInt(element.UI);
+                    let color=this.fillColor(Rssi)
+                    feature.setStyle(
+                            new ol.style.Style({
+                                image: new ol.style.Circle({
+                                    radius: 5,
+                                    fill: new ol.style.Fill({
+                                        color: color
+                                    }),
+                                })
+                            })
+                        );
+                    source.addFeature(feature);
+                })  
+                return source;  
+        }, [res.data])
+    // 数组中为传递给worker的参数，可以传递多个，此案例为2
+        .then(res =>{
+        let source = this.htmap.getSource();
+        source.clear();
+        _this.htmap.setSource(res);
+        }
+        ) // res为worker计算结束return返回的结果数据，可以在.then里根据返回结果继续操作主线程后续任务
+        .catch(e => console.log(e)) // 报错信息
 }

@@ -201,7 +201,7 @@ function createBaseMapParameter(gistype) {
         case "google":
             var lon = useprameters.PGIS_Center_lo;//中心点
             var lat = useprameters.PGIS_Center_la;//中心点
-            var projection = CoordinateBiasedAlgorithm.createGoogleProjection("GoogleBiased", [parseFloat(lon), parseFloat(lat)]);//创建谷歌偏移的坐标系
+            var projection =gcjMecator;// CoordinateBiasedAlgorithm.createGoogleProjection("GoogleBiased", [parseFloat(lon), parseFloat(lat)]);//创建谷歌偏移的坐标系
 
             parm.projection = projection;
             break;

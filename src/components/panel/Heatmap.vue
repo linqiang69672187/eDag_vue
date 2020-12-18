@@ -10,11 +10,13 @@
            </li>
                <li>选择起始时间：</li>
                <li>
-                  <DatePicker :value="sdate" format="yyyy-MM-dd" type="daterange" @on-change="loadHeatmapData" placement="bottom-end" placeholder="Select date" style="width: 200px"></DatePicker>
+                  <DatePicker :value="sdate"  format="yyyy-MM-dd" type="daterange" @on-change="loadHeatmapData" placement="bottom-end" placeholder="选择时间" style="width: 200px"></DatePicker>
                </li>
+               <!-- 
                 <li>
                  <Button  icon="ios-map" @click="changemap">主地图</Button>
                 </li>
+                   -->
            </ul>
           
        </div>
@@ -83,8 +85,8 @@ export default {
                     }
                 ],
                 rssiData:[],
-         
                 spinShow: false, 
+                work:null,
            
         }
     },
@@ -111,8 +113,9 @@ export default {
                                 sdate:sdate,                              
                             }
                           }).then((res) => {
-                                 _this.createFeature(res.data);  
-                                 _this.rssiData =  res.data;
+                            _this.createFeature(res.data);
+                           
+                           _this.rssiData =  res.data;
                             _this.spinShow=false;
                           }).catch((err) => {
                           console.log(err)
@@ -184,8 +187,10 @@ export default {
             },
             
             createFeature (data) {
-                       let source = this.htmap.getSource();
+                     let source = this.htmap.getSource();
                            source.clear();
+                      
+                        
                          data.forEach(element=>{
                                let geom = new ol.geom.Point(ol.proj.fromLonLat(element.co));
                                let feature = new ol.Feature({
@@ -208,7 +213,8 @@ export default {
                                     })
                                 );
                              source.addFeature(feature);
-                         })                             
+                         })  
+                         return source;                           
                 }, 
             fillColor(Rssi){
                 let r=255,g=255,b=255;
@@ -315,7 +321,19 @@ export default {
                         });   
                 this.map.addLayer(this.htmap);  
                 let _this=this;
-            
+                /**
+                let saoguan = new ol.Feature({
+                    geometry:new ol.geom.Point(ol.proj.transform([123.4659219, 41.761773],'EPSG:4326','EPSG:3857'))
+                });
+                
+                saoguan.setStyle(new ol.style.Style({
+                    image:new ol.style.Icon({
+                        src:'//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png'
+                    })
+                    }));
+                
+                 source.addFeature(saoguan);
+                 */
                 const dblClickInteraction = this.map
                             .getInteractions()
                             .getArray()
@@ -353,7 +371,7 @@ export default {
 
 #control{
     height:40px;
-    width: 545px;
+    width: 435px;
     position: absolute;
     z-index: 999;
     right: 20px;

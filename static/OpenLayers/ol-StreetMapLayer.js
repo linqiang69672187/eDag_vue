@@ -93,20 +93,20 @@ var createStreetMapLayer = function (thismap, id, option) {
 
         //创建动态纠偏坐标系的谷歌街景图
         var getGoogleBiased = function () {
-            var count=1;
             var streetMapSource = new ol.source.XYZ({
                 cacheSize: 500,
-                projection: option.projection,
+                projection: gcjMecator,
                 url: option.mapurl + "Normal/" + '{z}/{x}/{x}_{y}.' + option.maptype,
-                tileLoadFunction: function (imageTile, src) {
-                    var view = currentMap.getView();
-                    var mapExtent = view.calculateExtent(currentMap.getSize());
-                    var center = ol.extent.getCenter(mapExtent)
-                    var projection = CoordinateBiasedAlgorithm.createGoogleProjection("GoogleBiased" + count, center);
-                    streetMapSource.projection_ = projection;
-                    imageTile.getImage().src = src;
-                    count++;
-                }
+                
+               /// tileLoadFunction: function (imageTile, src) {
+                  //  var view = currentMap.getView();
+                   // var mapExtent = view.calculateExtent(currentMap.getSize());
+                  //  var center = ol.extent.getCenter(mapExtent)
+                  //  var projection = CoordinateBiasedAlgorithm.createGoogleProjection("GoogleBiased" + count, center);
+                  //  streetMapSource.projection_ = projection;
+                   /// imageTile.getImage().src = src;
+                 //   count++;
+               // }
             });
             var streetMapLayer = new ol.layer.Tile({
                 source: streetMapSource

@@ -27,6 +27,8 @@ import Viewui from 'view-design';
 import 'view-design/dist/styles/iview.css';
 import store from '@/vuex2/index'
 
+import VueWorker from 'vue-worker' 
+
 fontawesome.library.add(solid)
 fontawesome.library.add(regular)
 fontawesome.library.add(brands)
@@ -38,7 +40,7 @@ Vue.use(VueAxios, axios)
 Vue.use(loading)
 Vue.use(ElementUI);
 Vue.prototype.$axios=axios
-
+Vue.use(VueWorker)
 
 
 Vue.config.productionTip = false
@@ -51,9 +53,3 @@ new Vue({
   template: '<App/>',
   store
 })
-
-Vue.config.errorHandler = function (err, vm, info) {
-  console.error('error---', err)
-  console.info('vm---', vm)
-  console.info('info---', info)
-}
