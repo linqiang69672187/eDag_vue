@@ -4,7 +4,7 @@ import index from '@/components/index.vue'
 import Mainmap from '@/components/panel/Mainmap'
 import test from '@/components/test.vue'
 import heatmap from '@/components/panel/Heatmap.vue'
-import table from '@/components/control/tables.vue'
+import toolBox from '@/components/control/toolBox.vue'
 Vue.use(Router)
 
 export default new Router({
@@ -37,9 +37,9 @@ export default new Router({
       }
     },
     {
-      path: '/table',
-      name: 'table',
-      component: table
+      path: '/toolBox',
+      name: 'toolBox',
+      component: toolBox
     },
   ]
 })
