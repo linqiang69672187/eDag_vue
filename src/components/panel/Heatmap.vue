@@ -7,7 +7,7 @@
                    <Select v-model="ssri" @on-change="selectChange" style="width:100px" >
                       <Option v-for="item in cityList" :value="item.value" :key="item.value">{{ item.label }}</Option>
                    </Select>
-           </li>
+               </li>
                <li> </li>
                <li>
                   <DatePicker :value="sdate"  format="yyyy-MM-dd" type="daterange" @on-change="loadHeatmapData" placement="bottom-end" :placeholder="language.selectTime" style="width: 200px"></DatePicker>
