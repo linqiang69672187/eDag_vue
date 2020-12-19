@@ -95,7 +95,7 @@
                     </div>
                     <div class="buttons">
                         <ul>
-                            <li v-show="showsingalcall" @click="startDC()">
+                            <li v-show="showsingalcall&&!onlyPTT" @click="startDC()">
                                 <div  v-ripple="'rgba(255, 255, 255, 0.35)'">
                                 <div><i class="material-icons">person</i></div>
                                 <div>{{language.ACK_DUPLEX}}</div>
@@ -206,6 +206,7 @@ export default {
       transfer:true,
       showsingalcall:true, //显示单呼
       showthetab:false,
+      onlyPTT:true, //是否只有PDT用户
       IsEncrypt:0,  //是否加密
       msg:'',
       data2: [], //联想中的号码
