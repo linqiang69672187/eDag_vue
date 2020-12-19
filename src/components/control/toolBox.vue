@@ -1,7 +1,12 @@
 <template>
     <div >
         <ul>
-            <li><div><i class="fas fa-window-maximize"></i></div></li>
+            <li><div><i class="fa fa-object-group"></i></div></li>
+            <li><div><i class="fa fa-users"></i></div></li>  
+            <li><div><i class="fas fa-window-maximize"></i></div></li>  
+            <li><div><i class="fas fa-window-maximize"></i></div></li>  
+            <li><div><i class="fas fa-window-maximize"></i></div></li>  
+            <li><div><i class="fas fa-window-maximize"></i></div></li>  
             <li><div><i class="fas fa-window-maximize"></i></div></li>  
         </ul>
     </div>
@@ -35,9 +40,7 @@ export default {
         width: 30px;
         height: 30px;
         line-height: 30px;
-        border-style: solid;
-        border-radius:2px;
-        border-color: blueviolet;
-        border-width: 2px;;
+        
+   
    }
 </style>
