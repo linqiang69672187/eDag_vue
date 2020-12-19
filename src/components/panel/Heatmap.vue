@@ -8,9 +8,9 @@
                       <Option v-for="item in cityList" :value="item.value" :key="item.value">{{ item.label }}</Option>
                    </Select>
            </li>
-               <li>选择起始时间：</li>
+               <li> </li>
                <li>
-                  <DatePicker :value="sdate"  format="yyyy-MM-dd" type="daterange" @on-change="loadHeatmapData" placement="bottom-end" placeholder="选择时间" style="width: 200px"></DatePicker>
+                  <DatePicker :value="sdate"  format="yyyy-MM-dd" type="daterange" @on-change="loadHeatmapData" placement="bottom-end" :placeholder="language.selectTime" style="width: 200px"></DatePicker>
                </li>
                <!-- 
                 <li>
@@ -64,6 +64,7 @@ export default {
                 ssri: 'MS',
                 legendLabel:'图例',
                 sdate:[],
+                /**
                 columns5: [
                     {
                         title: 'ISSI',
@@ -80,13 +81,21 @@ export default {
                         sortable: true
                     },
                     {
-                        title: '下行场强',
+                        title: language.UIvalue,
                         key: 'UI'
                     }
                 ],
                 rssiData:[],
+                 */
                 spinShow: false, 
                 work:null,
+                language:{
+                    selectTime:'选择时间',   //_this.$refs.notice.info("场强信息","终端号码："+issi+"<br/>手台场强："+MS+"<br/>上行场强："+UI);
+                    srriInfo:'场强信息',
+                    issi:'终端号码',
+                    MSvalue:'手台场强',
+                    UIvalue:'下行场强',
+                }
            
         }
     },
@@ -358,7 +367,11 @@ export default {
                         let UI = feature.get("UI");
                         let issi = feature.get("issi");  
     
-                        _this.$refs.notice.info("场强信息","终端号码："+issi+"<br/>手台场强："+MS+"<br/>上行场强："+UI);
+                        _this.$refs.notice.info(_this.language.srriInfo,_this.language.issi+"："+issi+"<br/>"+_this.language.MSvalue+"："+MS+"<br/>"+_this.language.UIvalue+"："+UI);
+                        //srriInfo:'场强信息',
+                       //issi:'终端号码',
+                       //MSvalue:'手台场强',
+                       //UIvalue:'下行场强',
                     }
                 });
                 
@@ -371,7 +384,7 @@ export default {
 
 #control{
     height:40px;
-    width: 435px;
+    width: 400px;
     position: absolute;
     z-index: 999;
     right: 20px;
@@ -392,7 +405,7 @@ export default {
     margin-right: 10px;;
 }
 #control>ul>li:nth-child(2){
-padding-top: 10px;
+padding-top: 0px;
 width: 100px;
 text-align: right;
 }
