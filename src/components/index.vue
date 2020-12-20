@@ -524,9 +524,11 @@ export default {
  
   }
   .toolbox{
+      z-index: 999;
       position: absolute;
-      top: 120px !important;
-       right: 0px !important;
+      bottom: 250px !important;
+      right: 120px !important;
+       cursor: pointer;
        /*position: absolute;
       top: 110px !important;
        right: 20px !important;

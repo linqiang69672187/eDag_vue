@@ -1,11 +1,12 @@
 <template>
     <div>
         <ul font-size="0">
-            <li><div :style="{backgroundColor:colors.kuanxuang}" ><Icon  :color="colors.label"  size="20" type="ios-grid" /></div></li>
-            <li><div :style="{backgroundColor:colors.quanxuang}"><Icon  :color="colors.label"  size="20" type="ios-contacts" /></div></li>  
-            <li><div :style="{backgroundColor:colors.jingyin}"><Icon  :color="colors.label"  size="20" type="ios-notifications-off" /></div></li>  
-            <li><div :style="{backgroundColor:colors.dituhuifu}"><Icon  :color="colors.label" size="20" type="md-globe" /></div></li>  
-            <li><div :style="{backgroundColor:colors.renyuan}"><Icon  :color="colors.label"  size="20" type="ios-hammer" /></div></li>  
+            <li @click="clickthis('kuanxuangselected')"><div :class="{kuanxuangselected}"  :style="{backgroundColor:colors.kuanxuang}" ><Icon  :color="colors.label"  size="20" type="ios-grid" /></div></li><!--
+
+　　　　　　　--><li @click="clickthis('quanxuangselected')"><div :class="{quanxuangselected}"   :style="{backgroundColor:colors.quanxuang}"><Icon  :color="colors.label"  size="20" type="ios-contacts" /></div></li><!--  
+            --><li @click="clickthis('jingyinselected')"><div :class="{jingyinselected}"  :style="{backgroundColor:colors.jingyin}"><Icon  :color="colors.label"  size="20" type="ios-notifications-off" /></div></li><!--  
+            --><li @click="clickthis('dituhuifuselected')" ><div :class="{dituhuifuselected}" :style="{backgroundColor:colors.dituhuifu}"><Icon  :color="colors.label" size="20" type="md-globe" /></div></li><!--  
+            --><li @click="clickthis('renyuanselected')"><div :class="{renyuanselected}"  :style="{backgroundColor:colors.renyuan}"><Icon  :color="colors.label"  size="20" type="ios-hammer" /></div></li>  
         </ul>
     </div>
 </template>
@@ -22,12 +23,40 @@ export default {
                     jingyin:'#999999',
                     dituhuifu:'#cccccc',
                     renyuan:'#E54C3B',
-                }
+                },
+                kuanxuangselected:false,
+                quanxuangselected:false,
+                jingyinselected:false,
+                dituhuifuselected:false,
+                renyuanselected:false,
             }
         },
     mounted(){
+        
     },
     methods:{
+        clickthis(type){
+            this.kuanxuangselected=this.quanxuangselected=this.jingyinselected=this.dituhuifuselected=this.renyuanselected=false;
+            switch (type) {
+                case 'kuanxuangselected':
+                    this.kuanxuangselected=true;
+                 break;
+                case 'quanxuangselected':
+                    this.quanxuangselected=true;
+                 break;
+                case 'jingyinselected':
+                    this.jingyinselected=true;
+                 break;
+                 case 'dituhuifuselected':
+                    this.dituhuifuselected=true;
+                 break;
+                 case 'renyuanselected':
+                    this.renyuanselected=true;
+                 break;
+                default:
+                    break;
+            }
+        }
     }
 
 }
@@ -37,20 +66,37 @@ export default {
     ul{
     display:inline;
     white-space: nowrap;
+    vertical-align:bottom;
+    
+       margin:0;padding:0;
+      
     }
    ul li{
       list-style: none;
-      margin: 0;
+  
+       margin:0;padding:0;
+       vertical-align:bottom;
+       display: inline-block;
      
-       display: inline;
    }
+  
    ul div{
         width: 30px;
         height: 30px;
         line-height: 30px;
-       margin: 0;
-        
+        margin: 0;
+         
    }
+    div{
+         transition:all 0.6s;
+    -moz-transition:all 0.6s; /* Firefox 4 */
+    -webkit-transition:all 0.6s; /* Safari and Chrome */
+     -o-transition:all 0.6s; /* Opera */
+  }
+  .kuanxuangselected,.quanxuangselected,.jingyinselected,.dituhuifuselected,.renyuanselected{
+      height: 40px;
+      line-height: 40px;
+  }
 </style>
 <style>
  
