@@ -31,6 +31,7 @@
     <Mainmap ref="Mainmap" @changemap="changeMap" ></Mainmap>
     <MapToolbox ref="maptoolbox" @fullscreen="fullscreen"></MapToolbox>
     <LeftToolbox  ref="leftToolbox" @daiplate="cldaiplate" :style="{bottom:dmenuszie}"></LeftToolbox>
+    <toolBox class="toolbox" ref="toolBox"></toolBox>
     </div>
  
     <!--<Map  class="map" v-contextmenu:contextmenu move-type="0"></Map>
@@ -81,6 +82,9 @@ import LeftToolbox from "@/components/control/LeftToolbox"
 import OCX from "@/components/OCX"
 import languageset from '@/mixin/languageset'
 import Mainmap from '@/components/panel/Mainmap'
+import toolBox from "@/components/control/toolBox"
+
+
 
 export default {
     watch:{
@@ -201,8 +205,10 @@ export default {
         notice,
         LeftToolbox,
         Mainmap,
+        toolBox,
     },
-    methods:{
+  
+  methods:{
 
         buttonIn(){
             this.isSuccessButton2Hover=true
@@ -516,6 +522,15 @@ export default {
       position: absolute;
       bottom: 250px;
  
+  }
+  .toolbox{
+      position: absolute;
+      top: 120px !important;
+       right: 0px !important;
+       /*position: absolute;
+      top: 110px !important;
+       right: 20px !important;
+       */
   }
   #bottom-right-wrapper,.callbox,.left{
          transition:all 0.6s;

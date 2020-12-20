@@ -1,23 +1,28 @@
 <template>
-    <div >
-        <ul>
-            <li><div><i class="fa fa-object-group"></i></div></li>
-            <li><div><i class="fa fa-users"></i></div></li>  
-            <li><div><i class="fas fa-window-maximize"></i></div></li>  
-            <li><div><i class="fas fa-window-maximize"></i></div></li>  
-            <li><div><i class="fas fa-window-maximize"></i></div></li>  
-            <li><div><i class="fas fa-window-maximize"></i></div></li>  
-            <li><div><i class="fas fa-window-maximize"></i></div></li>  
+    <div>
+        <ul font-size="0">
+            <li><div :style="{backgroundColor:colors.kuanxuang}" ><Icon  :color="colors.label"  size="20" type="ios-grid" /></div></li>
+            <li><div :style="{backgroundColor:colors.quanxuang}"><Icon  :color="colors.label"  size="20" type="ios-contacts" /></div></li>  
+            <li><div :style="{backgroundColor:colors.jingyin}"><Icon  :color="colors.label"  size="20" type="ios-notifications-off" /></div></li>  
+            <li><div :style="{backgroundColor:colors.dituhuifu}"><Icon  :color="colors.label" size="20" type="md-globe" /></div></li>  
+            <li><div :style="{backgroundColor:colors.renyuan}"><Icon  :color="colors.label"  size="20" type="ios-hammer" /></div></li>  
         </ul>
     </div>
 </template>
 <script>
-
+import { Icon} from 'iview';
 export default {
     data () {
         return {
                 shwophonebg: false,
-                
+                colors:{
+                    label:'#fff',
+                    kuanxuang:'#164B77',
+                    quanxuang:'#FE9900',
+                    jingyin:'#999999',
+                    dituhuifu:'#cccccc',
+                    renyuan:'#E54C3B',
+                }
             }
         },
     mounted(){
@@ -28,19 +33,25 @@ export default {
 }
 </script>
 <style scoped>
+  
     ul{
     display:inline;
     white-space: nowrap;
     }
    ul li{
-        display:inline-block;
-      
+      list-style: none;
+      margin: 0;
+     
+       display: inline;
    }
    ul div{
         width: 30px;
         height: 30px;
         line-height: 30px;
+       margin: 0;
         
-   
    }
+</style>
+<style>
+ 
 </style>
