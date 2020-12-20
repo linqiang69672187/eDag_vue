@@ -31,7 +31,7 @@
     <Mainmap ref="Mainmap" @changemap="changeMap" ></Mainmap>
     <MapToolbox ref="maptoolbox" @fullscreen="fullscreen"></MapToolbox>
     <LeftToolbox  ref="leftToolbox" @daiplate="cldaiplate" :style="{bottom:dmenuszie}"></LeftToolbox>
-    <toolBox class="toolbox" ref="toolBox"></toolBox>
+    <toolBox class="toolbox" :class="{downtoolBox}" ref="toolBox"></toolBox>
     </div>
  
     <!--<Map  class="map" v-contextmenu:contextmenu move-type="0"></Map>
@@ -141,7 +141,7 @@ export default {
             GPS_ControlEnable:true,    //GPS上报权限
             loadingvue:null,
             hideheatmap:false,
-           
+            downtoolBox:false,
                 
         }
     },
@@ -238,6 +238,7 @@ export default {
            debugger;
            (isshow)?this.dmenuszie='260px !important':this.dmenuszie='10px !important'
           // console.info(isshow+this.dmenuszie)
+          this.downtoolBox=!isshow;
         },
         cldaiplate:function(){  
               this.$refs.dmenu.changeshowtab('','dialplate');
@@ -526,13 +527,16 @@ export default {
   .toolbox{
       z-index: 999;
       position: absolute;
-      bottom: 250px !important;
-      right: 120px !important;
+      bottom: 250px ;
+      right: 120px ;
        cursor: pointer;
        /*position: absolute;
       top: 110px !important;
        right: 20px !important;
        */
+  }
+  .downtoolBox{
+      bottom: 0px !important;
   }
   #bottom-right-wrapper,.callbox,.left{
          transition:all 0.6s;
