@@ -1,12 +1,11 @@
 <template>
     <div>
         <ul font-size="0">
-            <li @click="clickthis('kuanxuangselected')"><div :class="{kuanxuangselected}"  :style="{backgroundColor:colors.kuanxuang}" ><Icon  :color="colors.label"  size="20" type="ios-grid" /></div></li><!--
-
-　　　　　　　--><li @click="clickthis('quanxuangselected')"><div :class="{quanxuangselected}"   :style="{backgroundColor:colors.quanxuang}"><Icon  :color="colors.label"  size="20" type="ios-contacts" /></div></li><!--  
-            --><li @click="clickthis('jingyinselected')"><div :class="{jingyinselected}"  :style="{backgroundColor:colors.jingyin}"><Icon  :color="colors.label"  size="20" type="ios-notifications-off" /></div></li><!--  
-            --><li @click="clickthis('dituhuifuselected')" ><div :class="{dituhuifuselected}" :style="{backgroundColor:colors.dituhuifu}"><Icon  :color="colors.label" size="20" type="md-globe" /></div></li><!--  
-            --><li @click="clickthis('renyuanselected')"><div :class="{renyuanselected}"  :style="{backgroundColor:colors.renyuan}"><Icon  :color="colors.label"  size="20" type="ios-hammer" /></div></li>  
+             <li @mouseleave="outthis('kuanxuangselected')" @click="clickthis('kuanxuangselected')"><div :class="{kuanxuangselected}"  :style="{backgroundColor:colors.kuanxuang}" ><Icon  :color="colors.label"  size="20" type="ios-grid" /></div></li><!--
+　　　　　　　--><li @mouseleave="outthis('quanxuangselected')" @click="clickthis('quanxuangselected')"><div :class="{quanxuangselected}"   :style="{backgroundColor:colors.quanxuang}"><Icon  :color="colors.label"  size="20" type="ios-contacts" /></div></li><!--  
+            --><li @mouseleave="outthis('jingyinselected')" @click="clickthis('jingyinselected')"><div :class="{jingyinselected}"  :style="{backgroundColor:colors.jingyin}"><Icon  :color="colors.label"  size="20" type="ios-notifications-off" /></div></li><!--  
+            --><li @mouseleave="outthis('dituhuifuselected')" @click="clickthis('dituhuifuselected')" ><div :class="{dituhuifuselected}" :style="{backgroundColor:colors.dituhuifu}"><Icon  :color="colors.label" size="20" type="md-globe" /></div></li><!--  
+            --><li @mouseleave="outthis('renyuanselected')" @click="clickthis('renyuanselected')"><div :class="{renyuanselected}"  :style="{backgroundColor:colors.renyuan}"><Icon  :color="colors.label"  size="20" type="ios-hammer" /></div></li>  
         </ul>
     </div>
 </template>
@@ -56,7 +55,29 @@ export default {
                 default:
                     break;
             }
+        },
+         outthis(type){
+           switch (type) {
+                case 'kuanxuangselected':
+                    this.kuanxuangselected=false;
+                 break;
+                case 'quanxuangselected':
+                    this.quanxuangselected=false;
+                 break;
+                case 'jingyinselected':
+                    this.jingyinselected=false;
+                 break;
+                 case 'dituhuifuselected':
+                    this.dituhuifuselected=false;
+                 break;
+                 case 'renyuanselected':
+                    this.renyuanselected=false;
+                 break;
+                default:
+                    break;
+            }
         }
+        
     }
 
 }
