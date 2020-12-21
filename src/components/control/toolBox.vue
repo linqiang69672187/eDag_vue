@@ -1,16 +1,16 @@
 <template>
     <div>
-        <ul font-size="0">
-             <li @mouseleave="outthis('kuanxuangselected')" @click="clickthis('kuanxuangselected')"><div :class="{kuanxuangselected}"  :style="{backgroundColor:colors.kuanxuang}" ><Icon  :color="colors.label"  size="20" type="ios-grid" /></div></li><!--
-　　　　　　　--><li @mouseleave="outthis('quanxuangselected')" @click="clickthis('quanxuangselected')"><div :class="{quanxuangselected}"   :style="{backgroundColor:colors.quanxuang}"><Icon  :color="colors.label"  size="20" type="ios-contacts" /></div></li><!--  
-            --><li @mouseleave="outthis('jingyinselected')" @click="clickthis('jingyinselected')"><div :class="{jingyinselected}"  :style="{backgroundColor:colors.jingyin}"><Icon  :color="colors.label"  size="20" type="ios-notifications-off" /></div></li><!--  
-            --><li @mouseleave="outthis('dituhuifuselected')" @click="clickthis('dituhuifuselected')" ><div :class="{dituhuifuselected}" :style="{backgroundColor:colors.dituhuifu}"><Icon  :color="colors.label" size="20" type="md-globe" /></div></li><!--  
-            --><li @mouseleave="outthis('renyuanselected')" @click="clickthis('renyuanselected')"><div :class="{renyuanselected}"  :style="{backgroundColor:colors.renyuan}"><Icon  :color="colors.label"  size="20" type="ios-hammer" /></div></li>  
+        <ul font-size="0"><Tooltip content='框选'>
+             <li @mouseleave="outthis('kuanxuangselected')" @click="clickthis('kuanxuangselected')"><div :class="{kuanxuangselected}"  :style="{backgroundColor:colors.kuanxuang}" ><Icon  :color="colors.label"  size="20" type="ios-grid" /></div></li></Tooltip><!--
+　　　　　　　--><Tooltip content='框选'><li @mouseleave="outthis('quanxuangselected')" @click="clickthis('quanxuangselected')"><div :class="{quanxuangselected}"   :style="{backgroundColor:colors.quanxuang}"><Icon  :color="colors.label"  size="20" type="ios-contacts" /></div></li></Tooltip><!--  
+            --><Tooltip content='框选'><li @mouseleave="outthis('jingyinselected')" @click="clickthis('jingyinselected')"><div :class="{jingyinselected}"  :style="{backgroundColor:colors.jingyin}"><Icon  :color="colors.label"  size="20" type="ios-notifications-off" /></div></li></Tooltip><!--  
+            --><Tooltip content='框选'><li @mouseleave="outthis('dituhuifuselected')" @click="clickthis('dituhuifuselected')" ><div :class="{dituhuifuselected}" :style="{backgroundColor:colors.dituhuifu}"><Icon  :color="colors.label" size="20" type="md-globe" /></div></li></Tooltip><!--  
+            --><Tooltip content='框选'><li @mouseleave="outthis('renyuanselected')" @click="clickthis('renyuanselected')"><div :class="{renyuanselected}"  :style="{backgroundColor:colors.renyuan}"><Icon  :color="colors.label"  size="20" type="ios-hammer" /></div></li></Tooltip>  
         </ul>
     </div>
 </template>
 <script>
-import { Icon} from 'iview';
+import { Icon,Tooltip } from 'iview';
 export default {
     data () {
         return {
