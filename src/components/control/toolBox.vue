@@ -1,11 +1,11 @@
 <template>
     <div>
-        <ul font-size="0"><Tooltip content='框选'>
-             <li @mouseleave="outthis('kuanxuangselected')" @click="clickthis('kuanxuangselected')"><div :class="{kuanxuangselected}"  :style="{backgroundColor:colors.kuanxuang}" ><Icon  :color="colors.label"  size="20" type="ios-grid" /></div></li></Tooltip><!--
-　　　　　　　--><Tooltip content='框选'><li @mouseleave="outthis('quanxuangselected')" @click="clickthis('quanxuangselected')"><div :class="{quanxuangselected}"   :style="{backgroundColor:colors.quanxuang}"><Icon  :color="colors.label"  size="20" type="ios-contacts" /></div></li></Tooltip><!--  
-            --><Tooltip content='框选'><li @mouseleave="outthis('jingyinselected')" @click="clickthis('jingyinselected')"><div :class="{jingyinselected}"  :style="{backgroundColor:colors.jingyin}"><Icon  :color="colors.label"  size="20" type="ios-notifications-off" /></div></li></Tooltip><!--  
-            --><Tooltip content='框选'><li @mouseleave="outthis('dituhuifuselected')" @click="clickthis('dituhuifuselected')" ><div :class="{dituhuifuselected}" :style="{backgroundColor:colors.dituhuifu}"><Icon  :color="colors.label" size="20" type="md-globe" /></div></li></Tooltip><!--  
-            --><Tooltip content='框选'><li @mouseleave="outthis('renyuanselected')" @click="clickthis('renyuanselected')"><div :class="{renyuanselected}"  :style="{backgroundColor:colors.renyuan}"><Icon  :color="colors.label"  size="20" type="ios-hammer" /></div></li></Tooltip>  
+        <ul font-size="0">
+               <Tooltip :content="language.kuangxuan"  placement="top"><li @mouseleave="outthis('kuanxuangselected')" @click="clickthis('kuanxuangselected')"><div :class="{kuanxuangselected}"  :style="{backgroundColor:colors.kuanxuang}" ><Icon  :color="colors.label"  size="20" type="ios-grid" /></div></li></Tooltip><!--
+　　　　　　　--><Tooltip :content="language.quanxuang"  placement="top"><li @mouseleave="outthis('quanxuangselected')" @click="clickthis('quanxuangselected')"><div :class="{quanxuangselected}"   :style="{backgroundColor:colors.quanxuang}"><Icon  :color="colors.label"  size="20" type="ios-contacts" /></div></li></Tooltip><!--  
+            --><Tooltip content='框选'  placement="top"><li @mouseleave="outthis('jingyinselected')" @click="clickthis('jingyinselected')"><div :class="{jingyinselected}"  :style="{backgroundColor:colors.jingyin}"><Icon  :color="colors.label"  size="20" type="ios-notifications-off" /></div></li></Tooltip><!--  
+            --><Tooltip content='框选'  placement="top"><li @mouseleave="outthis('dituhuifuselected')" @click="clickthis('dituhuifuselected')" ><div :class="{dituhuifuselected}" :style="{backgroundColor:colors.dituhuifu}"><Icon  :color="colors.label" size="20" type="md-globe" /></div></li></Tooltip><!--  
+            --><Tooltip content='框选'  placement="top"><li @mouseleave="outthis('renyuanselected')" @click="clickthis('renyuanselected')"><div :class="{renyuanselected}"  :style="{backgroundColor:colors.renyuan}"><Icon  :color="colors.label"  size="20" type="ios-hammer" /></div></li></Tooltip>  
         </ul>
     </div>
 </template>
@@ -22,6 +22,10 @@ export default {
                     jingyin:'#999999',
                     dituhuifu:'#cccccc',
                     renyuan:'#E54C3B',
+                },
+                language:{
+                    kuangxuan:'框选',
+                    quanxuang:'圈选呼叫'
                 },
                 kuanxuangselected:false,
                 quanxuangselected:false,
