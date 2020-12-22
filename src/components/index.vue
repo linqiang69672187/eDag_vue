@@ -527,7 +527,7 @@ export default {
   .toolbox{
       z-index: 999;
       position: absolute;
-      bottom: 250px ;
+      bottom: 220px ;
       right: 120px ;
        cursor: pointer;
        /*position: absolute;
