@@ -28,7 +28,7 @@
     <div>
 
     <div >
-    <Mainmap ref="Mainmap" @changemap="changeMap" ></Mainmap>
+    <Mainmap ref="Mainmap" ></Mainmap>
     <MapToolbox ref="maptoolbox" @fullscreen="fullscreen"></MapToolbox>
     <LeftToolbox  ref="leftToolbox" @daiplate="cldaiplate" :style="{bottom:dmenuszie}"></LeftToolbox>
     <toolBox class="toolbox" :class="{downtoolBox}" ref="toolBox"></toolBox>

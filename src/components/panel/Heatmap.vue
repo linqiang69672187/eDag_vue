@@ -10,7 +10,7 @@
                </li>
                <li> </li>
                <li>
-                  <DatePicker :value="sdate"  format="yyyy-MM-dd" type="daterange" @on-change="loadHeatmapData" placement="bottom-end" :placeholder="language.selectTime" style="width: 200px"></DatePicker>
+                  <DatePicker :value="sdate" :editable="false"  format="yyyy-MM-dd" type="daterange" @on-change="loadHeatmapData" placement="bottom-end" :placeholder="language.selectTime" style="width: 200px"></DatePicker>
                </li>
                <!-- 
                 <li>
@@ -111,9 +111,10 @@ export default {
     methods:{  
         
             loadHeatmapData(date1){
+                console.info(date1);
                this.sdate =date1; 
                let sdate=date1[0]+'_'+date1[1];
-         
+                if (date1[0]=="") return;
                 this.spinShow=true;
                 let _this =this;
                  Vue.axios.get('/Handlers/getHeatmapRssidata.ashx', { // ，/app/data/json/OnlineTerminalCountGroupByBS.json，/Handlers/MVCEasy.ashx，
@@ -384,7 +385,7 @@ export default {
 
 #control{
     height:40px;
-    width: 400px;
+    width: 325px;
     position: absolute;
     z-index: 999;
     right: 20px;
