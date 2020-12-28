@@ -3,7 +3,7 @@
     <div class="toolbox " :class="{toolboxzindex:toolzindex}" >
         <ul>
             <li><a id="ol-ranging" @click="showdistance" ><Tooltip :content="language.measure" placement="bottom"> <div><i class="fas fa-ruler"></i></div></Tooltip></a></li>
-            <li><a>
+            <li>
                 <Poptip trigger="click" width="180"  placement="bottom">
                      <Tooltip :content="language.layercontrol" placement="bottom"><div><i class="fas fa-map"></i></div></Tooltip>
                      <div class="api" slot="content">
@@ -54,11 +54,29 @@
                                     </i-switch>
                                     </div>
                                 </div>
+                            </li>  
+                        </ul>
+                         <div>
+                             {{language.maptype}}
+                         </div>
+                            <ul>
+                            <li> 
+                                 <div>
+                                     <RadioGroup v-model="maptype" @on-change="mapchange">
+                                        <Radio label="normal">                               
+                                            <span>{{language.normal}}</span>
+                                        </Radio>
+                                        <Radio label="statelittle">                 
+                                            <span>{{language.statelittle}}</span>
+                                        </Radio>
+                                     </RadioGroup>
+                                 </div>
                             </li>
+                           
                         </ul>
                      </div>
                 </Poptip >
-            </a></li>
+           </li>
             <li><a @click="fullscreen"><Tooltip :content="language.fullscreen" :class="[isshowmini?'hide':'']" placement="bottom"> <div><i class="fas fa-window-maximize"></i></div></Tooltip><Tooltip :content="language.reback" placement="bottom" :class="[isshowmini?'':'hide']"> <div><i class="fas fa-window-minimize"></i></div></Tooltip></a></li>
             <li><a @click="zoomOut"><Tooltip :content="language.zoomOut" placement="bottom"> <div><i class="fas fa-search-minus"></i></div></Tooltip></a></li>
             <li><a @click="zoomIn"><Tooltip :content="language.zoomIn" placement="bottom"> <div><i class="fas fa-search-plus"></i></div></Tooltip></a></li>           
@@ -89,6 +107,27 @@
                     </a></li>
             </ul>
             <div id="mouse-position" class="measurevalue"></div>
+            <ul>
+                
+                <li>
+                    <a id="BoxSelection-type1">
+                         
+                            <Tooltip :content="language.distance" placement="bottom"> 
+                            <div><i class="fas fa-map-pin"></i></div>
+                            </Tooltip>
+                         
+                    </a>
+                    </li>
+                
+
+                <li><a id="BoxSelection-type2">
+                   
+                        <Tooltip :content="language.area" placement="bottom"> 
+                        <div><i class="fas fa-object-ungroup"></i></div>
+                        </Tooltip>
+                  
+                    </a></li>
+            </ul>
         </div>
  
      </transition>
@@ -98,7 +137,7 @@
 import Vue from 'vue'
 import { Switch } from 'iview'
 Vue.component('i-switch', Switch)
-import {Tooltip,Poptip,Checkbox } from 'iview'
+import {Tooltip,Poptip,Checkbox,RadioGroup,Radio} from 'iview'
 export default {
      data(){
        return{ 
@@ -110,6 +149,7 @@ export default {
            userStatus:true,
            BeaconStatus:true,
            isBeaconStatus:false,
+           maptype:'normal',
            language:{
                measure:'测量',
                layercontrol:'图层控制',
@@ -125,6 +165,9 @@ export default {
                distance:'距离',
                area:'面积',
                Lang_Beacon:'信 标',
+               maptype:'地图类型',
+               normal:'平面',
+               statelittle:'卫星'
            }           
        }
     },
@@ -173,6 +216,10 @@ export default {
          Beaconchange:function(){
              beaconLayerManager.setVisible(this.BeaconStatus);
         },
+        mapchange:function(){
+             alert(this.maptype);
+        }
+        ,
         zoomOut:function(){
             let loadevent = LoadEvents("zoomOut");
             loadevent();//调用原来缩小
@@ -256,12 +303,27 @@ export default {
         width: 32px;
         height: 32px;
         line-height: 32px;
+       
     }
 
-  
-  
+   .ivu-poptip>div>div{
+        cursor: pointer;  
+   }
+    .ivu-poptip>div>div:hover{
+      color:burlywood;
+   }
+   .ivu-poptip>div>div:active{
+      opacity: 0.3; 
+   }
    ul>li a{
       color: #fff;
+    }
+    .toolbox ul>li{
+         color: #fff; 
+    }
+    .api ul li{
+        color: #515a6e;
+
     }
     .focus{
       background-color: #fff;
@@ -323,9 +385,13 @@ export default {
   a:active{
      opacity: 0.3;  
   }
+  
 </style>
 <style >
 .ivu-poptip-body {
     padding: 8px 8px;
+}
+.toolbox  .ivu-poptip-body-content {
+      overflow: hidden !important;
 }
 </style>
