@@ -146,12 +146,18 @@ export default {
         }
     },
     mixins:[languageset,],
+    beforeCreate(){
+         window.vue_index= this;
+    },
     created(){
+      
+       
         this.loadingvue = this.$loading({text: 'loading',});
     },
     mounted(){
-        var _this = this;  
-        window.vue_index= this;
+   
+
+       var _this = this;  
         for (let i = 0; i < this.lmenuitems1.length; i++) { 
             _this.lmenuitems.push(_this.lmenuitems1[i]) 
         };                                    

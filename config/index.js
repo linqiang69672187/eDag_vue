@@ -80,7 +80,9 @@ module.exports = {
     assetsRoot: path.resolve(__dirname, '../dist'),
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
-
+    index: path.resolve(__dirname, '../dist/index.html'),
+    one: path.resolve(__dirname, '../dist/one.html'),
+    two: path.resolve(__dirname, '../dist/two.html'),
     /**
      * Source Maps
      */

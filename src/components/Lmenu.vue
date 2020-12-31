@@ -70,9 +70,11 @@ export default {
         Tooltip
     },
     mounted(){
+      if(useprameters){
       setTimeout(() => {//每隔一秒获取一下defaultLanguage
         this.languageSave=useprameters.defaultLanguage
       }, 1000)
+      } 
       this.getUserTimeStatisticsHref()      
     },
     computed: {
