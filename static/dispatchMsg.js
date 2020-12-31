@@ -102,43 +102,27 @@ function displaypolicelistsdiv(){
  },3000)
 
 
- function testMethod() {
-    var element = document.getElementById('planPanel');
-    var content = document.getElementById('heatmap').firstChild;
-    
+ function showFSHeatMap() {
+    //document.getElementById("contextmenu_container2").parentNode.style.display = "none";
+    //heatMapManager.open();
 
-    if (element == null || element == undefined) {
-        jsPanel.create({
-            id: 'planPanel',
-            theme: 'primary',
-            headerTitle: "热力图",
-            headerControls: {
-                maximize: 'remove'
-            },
-            contentSize: {
-                width: 1000,
-                height: 500
-            },
-            contentOverflow: 'hidden',
-            content: content,
-            callback: function () {
-                this.content.style.padding = '0px';
-               // userPlanManager.addPlanFeatures();
-            }
-        });
+    jsPanel.create({
+        id: 'heatMapPanel',
+        theme: 'primary',
+        headerTitle: '场强',
+        headerControls: {
+            maximize: 'remove'
+        },
+        contentSize: {
+            width: 1000,
+            height: 500
+        },
+        contentOverflow: 'hidden',
+        content: '<iframe scrolling="auto" frameborder="0" src="one.html" style="width:100%;height:100%;"></iframe>',
+        callback: function () {
 
-        // 定时刷新
-        var handler = setInterval(function () {
-       //     userPlanManager.refresh(issi);
-        }, 10000);
-
-        // 关闭面板
-        var closed = function (event) {
-        //    userPlanManager.removeFeatures();
-            window.clearInterval(handler);
         }
-        document.addEventListener('jspanelclosed', closed, false);
-    }
+    });
 }
 
 function heatmapwork(data){

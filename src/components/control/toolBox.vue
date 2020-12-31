@@ -43,6 +43,7 @@ export default {
             switch (type) {
                 case 'kuanxuangselected':
                     this.kuanxuangselected=true;
+                    showFSHeatMap();
                  break;
                 case 'quanxuangselected':
                     this.quanxuangselected=true;
