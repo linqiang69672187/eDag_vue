@@ -217,7 +217,16 @@ export default {
              beaconLayerManager.setVisible(this.BeaconStatus);
         },
         mapchange:function(){
-             alert(this.maptype);
+             if (this.maptype=='normal'){
+                 map.getLayerById("satelliteLayer").setVisible(false);
+                 map.getLayerById("offlineMapLayer").setVisible(true);
+             }
+             else
+             {
+                 map.getLayerById("satelliteLayer").setVisible(true);
+                 map.getLayerById("offlineMapLayer").setVisible(false);
+
+             }
         }
         ,
         zoomOut:function(){

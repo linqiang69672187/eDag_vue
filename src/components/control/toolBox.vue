@@ -98,9 +98,9 @@ export default {
     }
    ul li{
       list-style: none;
-  
        margin:0;padding:0;
-       vertical-align:bottom;
+
+       vertical-align:text-bottom;
        display: inline-block;
      
    }

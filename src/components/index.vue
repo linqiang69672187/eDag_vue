@@ -527,7 +527,7 @@ export default {
   .toolbox{
       z-index: 999;
       position: absolute;
-      bottom: 220px ;
+      bottom: 217px ;
       right:120px ;
        cursor: pointer;
        /*position: absolute;
@@ -536,7 +536,7 @@ export default {
        */
   }
   .downtoolBox{
-      bottom: 0px !important;
+      bottom: -3px !important;
 
   }
   #bottom-right-wrapper,.callbox,.left{
