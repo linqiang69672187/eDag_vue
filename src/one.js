@@ -14,6 +14,7 @@ import 'view-design/dist/styles/iview.css';
 
 
 Vue.use(Viewui)
+Vue.use(VueAxios, axios)
 Vue.prototype.$axios=axios
 Vue.config.productionTip = false
 

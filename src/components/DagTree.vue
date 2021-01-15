@@ -58,7 +58,8 @@ import { Tree  } from 'iview';
                 let treeNode={entityId:item.id,objType:item.type,name:item.title};  
               
                 displaypolicelistsdiv();//调用原来方法
-                window.frames['policelists'].Displayprocessbar();//调用原来方法
+                if(window.frames['policelists']){
+                   window.frames['policelists'].Displayprocessbar();//调用原来方法
                 switch(treeNode.objType){
                     case "entity":
                         window.frames['policelists'].getpolices(treeNode.name, treeNode.entityId); 
@@ -76,6 +77,8 @@ import { Tree  } from 'iview';
                         break;
                 }
                 console.info(item);
+                }
+               
             },
             checkchange(array,yitem){
                 console.info(this.data3);

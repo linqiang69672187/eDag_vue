@@ -29,9 +29,11 @@
         <div class="changewindows">{{language.serverlabel}}:{{servertime}}</div>
       </div>
     </div>
-    <div class="trangle" @click="isshowmini=!isshowmini"
+    <!-- <div class="trangle" @click="isshowmini=!isshowmini"
       :class="[isshowmini?'animated bounceInLeft':'',isshowmini==false?'animated bounceOutLeft':'']"></div>
-
+  </div> -->
+  <div class="trangle" @click="trangle"
+      :class="[isshowmini?'animated bounceInLeft':'',isshowmini==false?'animated bounceOutLeft':'']"></div>
   </div>
 </template>
 
@@ -92,9 +94,11 @@
     mixins: [date],
     components: {
       Badge,
-
     },
     methods: {
+      trangle(){
+        this.$emit('trangle')
+      },
       menuclk: function (val) {
 
         switch (val) {

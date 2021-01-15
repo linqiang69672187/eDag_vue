@@ -4,13 +4,13 @@
        <div id="control">
            <ul>
                <li>  
-                   <Select v-model="ssri" @on-change="selectChange" style="width:100px" >
+                   <Select v-model="ssri" :disabled="spinShow" @on-change="selectChange" style="width:100px" >
                       <Option v-for="item in cityList" :value="item.value" :key="item.value">{{ item.label }}</Option>
                    </Select>
                </li>
                <li> </li>
                <li>
-                  <DatePicker :value="sdate" :editable="false"  format="yyyy-MM-dd" type="daterange" @on-change="loadHeatmapData" placement="bottom-end" :placeholder="language.selectTime" style="width: 200px"></DatePicker>
+                  <DatePicker :value="sdate" :disabled="spinShow" :editable="false"  format="yyyy-MM-dd" type="daterange" @on-change="loadHeatmapData" placement="bottom-end" :placeholder="language.selectTime" style="width: 200px"></DatePicker>
                </li>
                <!-- 
                 <li>
@@ -51,6 +51,7 @@ export default {
                 },
                 map:null,
                 htmap:null,
+                bsmap:null,
                  cityList: [
                     {
                         value: 'MS',
@@ -107,9 +108,24 @@ export default {
     },
     mounted(){
       this.initMap();
+      this.loadBsStation();
     },
     methods:{  
-        
+         loadBsStation(){
+                let _this =this;
+               Vue.axios.get('/Handlers/GetAllBaseStation.ashx', { // ，/app/data/json/OnlineTerminalCountGroupByBS.json，/Handlers/MVCEasy.ashx，
+                            params: {
+                                L:'1',                                         
+                            }
+                          }).then((res) => {
+                          console.info(res)
+                          _this.createBsFeature(res.data)
+                          }).catch((err) => {
+                          console.log(err)
+                         
+                      
+                   });   
+            },
             loadHeatmapData(date1){
                 console.info(date1);
                this.sdate =date1; 
@@ -117,7 +133,7 @@ export default {
                 if (date1[0]=="") return;
                 this.spinShow=true;
                 let _this =this;
-                 Vue.axios.get('/Handlers/getHeatmapRssidata.ashx', { // ，/app/data/json/OnlineTerminalCountGroupByBS.json，/Handlers/MVCEasy.ashx，
+                Vue.axios.get('/Handlers/getHeatmapRssidata.ashx', { // ，/app/data/json/OnlineTerminalCountGroupByBS.json，/Handlers/MVCEasy.ashx，
                             params: {
                                 type:this.ssri,
                                 sdate:sdate,                              
@@ -131,7 +147,9 @@ export default {
                           console.log(err)
                            _this.spinShow=false;
                       
-                   })   
+                   });
+                
+                   
             },
             createLegend(){
                 let params = {
@@ -225,7 +243,25 @@ export default {
                              source.addFeature(feature);
                          })  
                          return source;                           
-                }, 
+                },
+            createBsFeature(data){
+                 let source = this.bsmap.getSource();
+                  data.forEach(element=>{
+                    let Bs = new ol.Feature({
+                    geometry:new ol.geom.Point(ol.proj.transform([element.Lo, element.La],'EPSG:4326','EPSG:3857'))
+                });
+                
+                Bs.setStyle(new ol.style.Style({
+                    image:new ol.style.Icon({
+                        src:'../Images/BaseStation.png',
+                          offsetX: -30,
+                          offsetY: -36,
+                    })
+                 }));
+                
+                  source.addFeature(Bs);
+                  }) 
+            }, 
             fillColor(Rssi){
                 let r=255,g=255,b=255;
                 if(0<=Rssi && Rssi<=80){
@@ -327,9 +363,13 @@ export default {
                 var source = new ol.source.Vector({}) ;
                 this.htmap = new ol.layer.Vector({
                             source: source,
-                        
                         });   
-                this.map.addLayer(this.htmap);  
+                var bssource = new ol.source.Vector({}) ;    
+                this.bsmap = new ol.layer.Vector({
+                            source: bssource,
+                        });  
+                this.map.addLayer(this.htmap);
+                this.map.addLayer(this.bsmap);
                 let _this=this;
                 /**
                 let saoguan = new ol.Feature({
