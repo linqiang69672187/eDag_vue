@@ -12,11 +12,17 @@
                <li>
                   <DatePicker :value="sdate" :disabled="spinShow" :editable="false"  format="yyyy-MM-dd" type="daterange" @on-change="loadHeatmapData" placement="bottom-end" :placeholder="language.selectTime" style="width: 200px"></DatePicker>
                </li>
+                <li>
+                <i-switch  @on-change="Beaconchange"  v-model="BeaconStatus"  size="large">
+                                        <span slot="open">{{language.open}}</span>
+                                        <span slot="close">{{language.close}}</span>
+                 </i-switch>
+                </li> 
                <!-- 
                 <li>
                  <Button  icon="ios-map" @click="changemap">主地图</Button>
                 </li>
-                   -->
+                  -->
            </ul>
           
        </div>
@@ -34,12 +40,14 @@
                 <Icon type="ios-loading" size=18 class="demo-spin-icon-load"></Icon>
                 <div>Loading</div>
           </Spin>
-       
+            
     </div>
 </template>
 <script>
 import Vue from 'vue';
-import { Select,DatePicker,Page,Spin,Icon,Button } from 'iview';
+
+import { Select,DatePicker,Page,Spin,Icon,Button, Switch } from 'iview'
+Vue.component('i-switch', Switch)
 import notice from "@/components/control/notices";
 
 export default {
