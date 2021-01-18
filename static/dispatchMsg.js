@@ -15,8 +15,11 @@ function openwindows(windowstr){
     console.info(windowstr);
     mycallfunction('DispatchFunc', 450, 600)
 }
+function GetTextByName(name){
+    return "查看当前范围场强";
+} 
 var useprameters={};
-useprameters.Emapurl="http://10.8.59.253:8079/";
+useprameters.Emapurl="http://10.8.59.253:8081/";
 useprameters.maptype ="png";
 useprameters.maxLevel=16;
 useprameters.minLevel=7;

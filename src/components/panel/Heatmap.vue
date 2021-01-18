@@ -4,25 +4,30 @@
        <div id="control">
            <ul>
                <li>  
-                   <Select v-model="ssri" :disabled="spinShow" @on-change="selectChange" style="width:100px" >
+                   <Select v-model="ssri" :disabled="spinShow"  style="width:100px" >
                       <Option v-for="item in cityList" :value="item.value" :key="item.value">{{ item.label }}</Option>
                    </Select>
                </li>
                <li> </li>
                <li>
-                  <DatePicker :value="sdate" :disabled="spinShow" :editable="false"  format="yyyy-MM-dd" type="daterange" @on-change="loadHeatmapData" placement="bottom-end" :placeholder="language.selectTime" style="width: 200px"></DatePicker>
+                  <DatePicker v-model="sdate"  :disabled="spinShow" :editable="false"  :format="yyyy-MM-dd" type="daterange"  placement="bottom-end" :placeholder="language.selectTime" style="width: 200px"></DatePicker>
                </li>
                 <li>
-                <i-switch  @on-change="Beaconchange"  v-model="BeaconStatus"  size="large">
+                    <div>
+                                 <div class="left">{{language.basestation}}：</div> 
+                                    <div class="right">
+                                    <i-switch  @on-change="Beaconchange" :disabled="spinShow"  v-model="BeaconStatus"  size="large">
                                         <span slot="open">{{language.open}}</span>
                                         <span slot="close">{{language.close}}</span>
-                 </i-switch>
+                                    </i-switch>
+                                    </div>
+                   </div>
                 </li> 
-               <!-- 
+            
                 <li>
-                 <Button  icon="ios-map" @click="changemap">主地图</Button>
+                 <Button  icon="ios-map" @click="selectChange">{{language.selectSrri}}</Button>
                 </li>
-                  -->
+            
            </ul>
           
        </div>
@@ -36,10 +41,12 @@
        </div>
        -->
            <notice ref="notice"></notice>
+             
           <Spin fix  v-if="spinShow">
                 <Icon type="ios-loading" size=18 class="demo-spin-icon-load"></Icon>
                 <div>Loading</div>
           </Spin>
+        
             
     </div>
 </template>
@@ -73,6 +80,7 @@ export default {
                 ssri: 'MS',
                 legendLabel:'图例',
                 sdate:[],
+                BeaconStatus:false,
                 /**
                 columns5: [
                     {
@@ -98,12 +106,17 @@ export default {
                  */
                 spinShow: false, 
                 work:null,
+                isloadBs:false,
                 language:{
                     selectTime:'选择时间',   //_this.$refs.notice.info("场强信息","终端号码："+issi+"<br/>手台场强："+MS+"<br/>上行场强："+UI);
                     srriInfo:'场强信息',
                     issi:'终端号码',
                     MSvalue:'手台场强',
                     UIvalue:'下行场强',
+                    basestation:'基 站',
+                    open:'开启',
+                    close:'关闭',
+                    selectSrri:'查看当前范围场强'
                 }
            
         }
@@ -115,8 +128,11 @@ export default {
         notice,
     },
     mounted(){
+      this.setlanguage();
       this.initMap();
-      this.loadBsStation();
+      //this.loadHeatmapData();
+    
+      
     },
     methods:{  
          loadBsStation(){
@@ -127,7 +143,8 @@ export default {
                             }
                           }).then((res) => {
                           console.info(res)
-                          _this.createBsFeature(res.data)
+                          _this.createBsFeature(res.data);
+                          _this.isloadBs=true;
                           }).catch((err) => {
                           console.log(err)
                          
@@ -136,15 +153,23 @@ export default {
             },
             loadHeatmapData(date1){
                 console.info(date1);
-               this.sdate =date1; 
-               let sdate=date1[0]+'_'+date1[1];
+                if (this.spinShow)return;
+                var extent = this.map.getView().calculateExtent(this.map.getSize());
+
+                var bottomLeft = ol.proj.transform(ol.extent.getBottomLeft(extent),'EPSG:3857', 'EPSG:4326');
+                var topRight = ol.proj.transform(ol.extent.getTopRight(extent),'EPSG:3857', 'EPSG:4326');
+                var bbs = bottomLeft[0] + "_" + topRight[0] + "_" + bottomLeft[1] + "_" + topRight[1] ;
+                 console.info(bbs);
+                this.sdate =date1; 
+                let sdate=this.dateFormat("yyyy-MM-dd",date1[0])+'_'+this.dateFormat("yyyy-MM-dd",date1[1]);
                 if (date1[0]=="") return;
                 this.spinShow=true;
                 let _this =this;
                 Vue.axios.get('/Handlers/getHeatmapRssidata.ashx', { // ，/app/data/json/OnlineTerminalCountGroupByBS.json，/Handlers/MVCEasy.ashx，
                             params: {
                                 type:this.ssri,
-                                sdate:sdate,                              
+                                sdate:sdate, 
+                                  bbs:bbs                       
                             }
                           }).then((res) => {
                             _this.createFeature(res.data);
@@ -159,6 +184,25 @@ export default {
                 
                    
             },
+            dateFormat(fmt, date) {
+                    let ret;
+                    const opt = {
+                        "Y+": date.getFullYear().toString(),        // 年
+                        "m+": (date.getMonth() + 1).toString(),     // 月
+                        "d+": date.getDate().toString(),            // 日
+                        "H+": date.getHours().toString(),           // 时
+                        "M+": date.getMinutes().toString(),         // 分
+                        "S+": date.getSeconds().toString()          // 秒
+                        // 有其他格式化字符需求可以继续添加，必须转化成字符串
+                    };
+                    for (let k in opt) {
+                        ret = new RegExp("(" + k + ")").exec(fmt);
+                        if (ret) {
+                            fmt = fmt.replace(ret[1], (ret[1].length == 1) ? (opt[k]) : (opt[k].padStart(ret[1].length, "0")))
+                        };
+                    };
+                    return fmt;
+                },
             createLegend(){
                 let params = {
                             krigingModel: 'exponential',//model还可选'gaussian','spherical'
@@ -311,8 +355,8 @@ export default {
                 debugger;
                 console.info(this.sdate);
                //this.createFeature(this.rssiData);
-              
                 this.loadHeatmapData(this.sdate);
+               // this.loadHeatmapData(this.sdate);
               // this.$Spin.show();
             //    this.spinShow=true;
             //    let features = this.htmap.getSource().getFeatures();
@@ -337,6 +381,7 @@ export default {
             //  this.spinShow=false;
 
             },
+            
             changemap(){
                this.$router.push({name:'index'}) 
             },
@@ -423,8 +468,35 @@ export default {
                        //UIvalue:'下行场强',
                     }
                 });
-                
+              //  this.map.getView().on('change:resolution', this.changemapcenter);
+               // this.map.getView().on('change:center',this.changemapcenter);
             },
+            changemapcenter(){
+                this.loadHeatmapData(this.sdate);
+            },
+            Beaconchange(){
+                this.bsmap.setVisible(this.BeaconStatus);
+              
+                if(this.BeaconStatus&&!this.isloadBs){
+                    this.loadBsStation();
+
+                }
+            },
+          setlanguage(){
+            this.language={
+               basestation:window.parent.GetTextByName("OperateLogIdentityDeviceType0"),
+               open:window.parent.GetTextByName("Single_Open"),
+               close:window.parent.GetTextByName("Closebtn"),
+               selectTime:window.parent.GetTextByName("SelectDate"),
+               srriInfo:window.parent.GetTextByName("FSHeatMap"),
+               issi:window.parent.GetTextByName("Terminal"),
+               MSvalue:window.parent.GetTextByName("signaldown"),
+               UIvalue:window.parent.GetTextByName("signalup"),
+               selectSrri:window.parent.GetTextByName("FSFWHeatMap"),
+           }
+           this.legendLabel=window.parent.GetTextByName("legend"); 
+
+         } 
         },
 
     }
@@ -433,7 +505,7 @@ export default {
 
 #control{
     height:40px;
-    width: 325px;
+    width: 575px;
     position: absolute;
     z-index: 999;
     right: 20px;
@@ -498,7 +570,19 @@ text-align: right;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
         position: absolute;
     }
+.left{
+    float: left;
+    width: calc(100% - 50px);
+    text-align: right;
+    font-size: 14px;
+    margin-top: 5px;
+}
 
+.right{
+    float: right;
+    width: 50px;
+        margin-top: 5px;
+}
      
 </style>
 <style >

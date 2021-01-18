@@ -19,7 +19,7 @@ module.exports = {
         }
       },
       '/Handlers':{
-        target:'http://localhost:42680/Handlers',
+        target:'http://localhost:11347/Handlers',
         changeOrigin:true,
         pathRewrite:{
             '^/Handlers':''
