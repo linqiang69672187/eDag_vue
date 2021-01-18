@@ -10,7 +10,7 @@
                </li>
                <li> </li>
                <li>
-                  <DatePicker v-model="sdate"  :disabled="spinShow" :editable="false"  :format="yyyy-MM-dd" type="daterange"  placement="bottom-end" :placeholder="language.selectTime" style="width: 200px"></DatePicker>
+                  <DatePicker  @on-change="selectChange"  :disabled="spinShow" :editable="false"  format="yyyy-MM-dd" type="daterange"  placement="bottom-end" :placeholder="language.selectTime" style="width: 200px"></DatePicker>
                </li>
                 <li>
                     <div>
@@ -25,7 +25,7 @@
                 </li> 
             
                 <li>
-                 <Button  icon="ios-map" @click="selectChange">{{language.selectSrri}}</Button>
+                 <Button  icon="ios-map" @click="selectHeatmap">{{language.selectSrri}}</Button>
                 </li>
             
            </ul>
@@ -161,7 +161,7 @@ export default {
                 var bbs = bottomLeft[0] + "_" + topRight[0] + "_" + bottomLeft[1] + "_" + topRight[1] ;
                  console.info(bbs);
                 this.sdate =date1; 
-                let sdate=this.dateFormat("yyyy-MM-dd",date1[0])+'_'+this.dateFormat("yyyy-MM-dd",date1[1]);
+                let sdate=date1[0]+'_'+date1[1];
                 if (date1[0]=="") return;
                 this.spinShow=true;
                 let _this =this;
@@ -184,25 +184,6 @@ export default {
                 
                    
             },
-            dateFormat(fmt, date) {
-                    let ret;
-                    const opt = {
-                        "Y+": date.getFullYear().toString(),        // 年
-                        "m+": (date.getMonth() + 1).toString(),     // 月
-                        "d+": date.getDate().toString(),            // 日
-                        "H+": date.getHours().toString(),           // 时
-                        "M+": date.getMinutes().toString(),         // 分
-                        "S+": date.getSeconds().toString()          // 秒
-                        // 有其他格式化字符需求可以继续添加，必须转化成字符串
-                    };
-                    for (let k in opt) {
-                        ret = new RegExp("(" + k + ")").exec(fmt);
-                        if (ret) {
-                            fmt = fmt.replace(ret[1], (ret[1].length == 1) ? (opt[k]) : (opt[k].padStart(ret[1].length, "0")))
-                        };
-                    };
-                    return fmt;
-                },
             createLegend(){
                 let params = {
                             krigingModel: 'exponential',//model还可选'gaussian','spherical'
@@ -351,11 +332,13 @@ export default {
               
 
             },
-            selectChange(){
+            selectChange(val1,val2){
                 debugger;
+                this.sdate.length=0;
+                this.sdate=val1;
                 console.info(this.sdate);
                //this.createFeature(this.rssiData);
-                this.loadHeatmapData(this.sdate);
+              
                // this.loadHeatmapData(this.sdate);
               // this.$Spin.show();
             //    this.spinShow=true;
@@ -381,7 +364,9 @@ export default {
             //  this.spinShow=false;
 
             },
-            
+            selectHeatmap(){
+                this.loadHeatmapData(this.sdate);
+            },
             changemap(){
                this.$router.push({name:'index'}) 
             },
