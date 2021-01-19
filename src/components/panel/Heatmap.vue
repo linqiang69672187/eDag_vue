@@ -25,7 +25,7 @@
                 </li> 
             
                 <li>
-                 <Button  icon="ios-map" @click="selectHeatmap">{{language.selectSrri}}</Button>
+                 <Button  icon="ios-map"  :disabled="spinShow"  @click="selectHeatmap">{{language.selectSrri}}</Button>
                 </li>
             
            </ul>
@@ -40,7 +40,7 @@
           <Page :total="100" />
        </div>
        -->
-           <notice ref="notice"></notice>
+           <!-- <notice ref="notice"></notice> -->
              
           <Spin fix  v-if="spinShow">
                 <Icon type="ios-loading" size=18 class="demo-spin-icon-load"></Icon>
@@ -55,7 +55,7 @@ import Vue from 'vue';
 
 import { Select,DatePicker,Page,Spin,Icon,Button, Switch } from 'iview'
 Vue.component('i-switch', Switch)
-import notice from "@/components/control/notices";
+// import notice from "@/components/control/notices";
 
 export default {
     data(){
@@ -125,7 +125,7 @@ export default {
          
     },
     components:{
-        notice,
+        // notice,
     },
     mounted(){
       this.setlanguage();
@@ -256,9 +256,9 @@ export default {
                                let geom = new ol.geom.Point(ol.proj.fromLonLat(element.co));
                                let feature = new ol.Feature({
                                    geometry: geom,
-                                   MS : element.MS,
-                                   UI : element.UI,
-                                  issi : element.issi,
+                                  // MS : element.MS,
+                                 //  UI : element.UI,
+                                 // issi : element.issi,
                                });
                                
                                let Rssi = this.ssri=="MS"?parseInt(element.MS):parseInt(element.UI);
@@ -374,16 +374,16 @@ export default {
             initMap() {
           
                 this.createLegend();
-                var GISTYPE =window.parent.useprameters.GISTYPE.toLowerCase();
+                var GISTYPE =useprameters.GISTYPE.toLowerCase();
                 var viewParam = {
-                    "lo":window.parent.useprameters.PGIS_Center_lo,//中心点
-                    "la": window.parent.useprameters.PGIS_Center_la,//中心点
-                    "maxLevel": window.parent.useprameters.maxLevel,//最大层级
-                    "minLevel": window.parent.useprameters.minLevel,//最小层级
-                    "currentLevel": window.parent.useprameters.maxLevel-2//显示层级
+                    "lo":useprameters.PGIS_Center_lo,//中心点
+                    "la": useprameters.PGIS_Center_la,//中心点
+                    "maxLevel": useprameters.maxLevel,//最大层级
+                    "minLevel": useprameters.minLevel,//最小层级
+                    "currentLevel": useprameters.maxLevel-2//显示层级
                 }
                 console.info(viewParam);
-                var view = window.parent.createView(GISTYPE, viewParam);//创建视图
+                var view = createView(GISTYPE, viewParam);//创建视图
                 this.map = new ol.Map({
                     target:  this.$el,
                     // 设置地图控件，默认的三个控件都不显示
@@ -396,8 +396,8 @@ export default {
                    
                 }); 
             
-                var offlineMapLayerParams = window.parent.createBaseMapParameter(GISTYPE);
-                var streetMapLayer = window.parent.createStreetMapLayer(this.map, "offlineMapLayer", offlineMapLayerParams);//创建街景图
+                var offlineMapLayerParams = createBaseMapParameter(GISTYPE);
+                var streetMapLayer = createStreetMapLayer(this.map, "offlineMapLayer", offlineMapLayerParams);//创建街景图
                 var source = new ol.source.Vector({}) ;
                 this.htmap = new ol.layer.Vector({
                             source: source,
@@ -429,6 +429,7 @@ export default {
                             return interaction instanceof ol.interaction.DoubleClickZoom;
                             });
                 this.map.removeInteraction(dblClickInteraction);
+                /**
                 this.map.on('dblclick', function (evt) {
                   //  point_overlay.setPosition([0, 0]);
                    // $(".zq1").hide();
@@ -453,6 +454,7 @@ export default {
                        //UIvalue:'下行场强',
                     }
                 });
+                 */
               //  this.map.getView().on('change:resolution', this.changemapcenter);
                // this.map.getView().on('change:center',this.changemapcenter);
             },
@@ -469,17 +471,17 @@ export default {
             },
           setlanguage(){
             this.language={
-               basestation:window.parent.GetTextByName("OperateLogIdentityDeviceType0"),
-               open:window.parent.GetTextByName("Single_Open"),
-               close:window.parent.GetTextByName("Closebtn"),
-               selectTime:window.parent.GetTextByName("SelectDate"),
-               srriInfo:window.parent.GetTextByName("FSHeatMap"),
-               issi:window.parent.GetTextByName("Terminal"),
-               MSvalue:window.parent.GetTextByName("signaldown"),
-               UIvalue:window.parent.GetTextByName("signalup"),
-               selectSrri:window.parent.GetTextByName("FSFWHeatMap"),
+               basestation:GetTextByName("OperateLogIdentityDeviceType0"),
+               open:GetTextByName("Single_Open"),
+               close:GetTextByName("Closebtn"),
+               selectTime:GetTextByName("SelectDate"),
+               srriInfo:GetTextByName("FSHeatMap"),
+               issi:GetTextByName("Terminal"),
+               MSvalue:GetTextByName("signaldown"),
+               UIvalue:GetTextByName("signalup"),
+               selectSrri:GetTextByName("FSFWHeatMap"),
            }
-           this.legendLabel=window.parent.GetTextByName("legend"); 
+           this.legendLabel=GetTextByName("legend"); 
 
          } 
         },
