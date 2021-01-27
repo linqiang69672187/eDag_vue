@@ -11,7 +11,12 @@ import router from './router/one'
 
 import Viewui from 'view-design';
 import 'view-design/dist/styles/iview.css';
+import { locale } from 'view-design';
+import lang from 'view-design/dist/locale/en-US';
 
+if (opener.useprameters.defaultLanguage!='zh-CN'){
+locale(lang); 
+}
 
 Vue.use(Viewui)
 Vue.use(VueAxios, axios)

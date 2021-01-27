@@ -30,7 +30,7 @@ useprameters.GISTYPE="tianditu"; //tianditu,google
 useprameters.name = "zhej";
 useprameters.usename = "LQ";
 useprameters.servertime = "1571984937504";
-useprameters.defaultLanguage="zh-CN";
+useprameters.defaultLanguage="en-US";
 useprameters.SystemType ="1";
 
 useprameters.DTCZEnable = "1"; //动态重组是否启用 

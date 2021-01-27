@@ -370,7 +370,7 @@ export default {
              let ssjl = GetTextByName("Lang_RealTimePoliceStrength"); 
              let dzzl = GetTextByName("Lang_DZLLStatistic"); 
              let zxtj = GetTextByName("Lang_OnlinesStatistic"); 
-             let sctj = GetTextByName("Lang_UserTimeStatistics");
+             let sctj = GetTextByName("UserTimeStatistics");
                 // DTCZEnable:true,   //动态重组权限
                 // SMSEnable:true,    //短信权限
                 // PullUp_ControlEnable:true, //GPS上拉权限

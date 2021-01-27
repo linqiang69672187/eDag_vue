@@ -253,6 +253,8 @@ export default {
                distance:GetTextByName("MeasureBar_distancetooltip"),
                area:GetTextByName("MeasureBar_surfacetooltip"),
                Lang_Beacon:GetTextByName("Lang_Beacon"),
+               normal:GetTextByName("controlPlaneMap"),
+               statelittle:GetTextByName("controlSatellitemap")
            }  
 
          } 

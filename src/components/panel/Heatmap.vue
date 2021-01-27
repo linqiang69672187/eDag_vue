@@ -1,7 +1,6 @@
 <template>
-    <div>
-
-       <div id="control">
+    <div  style="height:100%">
+       <div id="control" :style="{  width: controlwidth + 'px' }">
            <ul>
                <li>  
                    <Select v-model="ssri" :disabled="spinShow"  style="width:100px" >
@@ -57,6 +56,10 @@ import { Select,DatePicker,Page,Spin,Icon,Button, Switch } from 'iview'
 Vue.component('i-switch', Switch)
 // import notice from "@/components/control/notices";
 
+
+// configure language
+
+
 export default {
     data(){
         return{
@@ -81,6 +84,7 @@ export default {
                 legendLabel:'图例',
                 sdate:[],
                 BeaconStatus:false,
+                controlwidth:610,
                 /**
                 columns5: [
                     {
@@ -124,6 +128,9 @@ export default {
     created(){
          
     },
+    beforeCreate(){
+         window.vue_index= this;
+    },
     components:{
         // notice,
     },
@@ -131,8 +138,6 @@ export default {
       this.setlanguage();
       this.initMap();
       //this.loadHeatmapData();
-    
-      
     },
     methods:{  
          loadBsStation(){
@@ -144,10 +149,10 @@ export default {
                           }).then((res) => {
                           console.info(res)
                           _this.createBsFeature(res.data);
-                          _this.isloadBs=true;
+                       
                           }).catch((err) => {
                           console.log(err)
-                         
+                          _this.isloadBs=true;
                       
                    });   
             },
@@ -246,13 +251,22 @@ export default {
                      content.appendChild(canvas);
 
             },
-            
+            sleepThread(numberMillis){
+                var now = new Date(); 
+                    var exitTime = now.getTime() + numberMillis; 
+                    while (true) { 
+                    now = new Date(); 
+                    if (now.getTime() > exitTime) 
+                    return; 
+                    } 
+            },
             createFeature (data) {
                      let source = this.htmap.getSource();
                            source.clear();
                       
-                        
+                        let count =0;
                          data.forEach(element=>{
+                              count+=1;
                                let geom = new ol.geom.Point(ol.proj.fromLonLat(element.co));
                                let feature = new ol.Feature({
                                    geometry: geom,
@@ -260,13 +274,16 @@ export default {
                                  //  UI : element.UI,
                                  // issi : element.issi,
                                });
-                               
+                               if (count%100==0){
+                               this.sleepThread(100);
+                               console.info("count:"+count);
+                               }
                                let Rssi = this.ssri=="MS"?parseInt(element.MS):parseInt(element.UI);
                                let color=this.fillColor(Rssi)
                                feature.setStyle(
                                     new ol.style.Style({
                                         image: new ol.style.Circle({
-                                            radius: 5,
+                                            radius: 10,
                                             fill: new ol.style.Fill({
                                                 color: color
                                             }),
@@ -275,7 +292,8 @@ export default {
                                 );
                              source.addFeature(feature);
                          })  
-                         return source;                           
+                        // return source;  
+                       this.spinShow=false;                         
                 },
             createBsFeature(data){
                  let source = this.bsmap.getSource();
@@ -374,13 +392,13 @@ export default {
             initMap() {
           
                 this.createLegend();
-                var GISTYPE =useprameters.GISTYPE.toLowerCase();
+                var GISTYPE =opener.useprameters.GISTYPE.toLowerCase();
                 var viewParam = {
-                    "lo":useprameters.PGIS_Center_lo,//中心点
-                    "la": useprameters.PGIS_Center_la,//中心点
-                    "maxLevel": useprameters.maxLevel,//最大层级
-                    "minLevel": useprameters.minLevel,//最小层级
-                    "currentLevel": useprameters.maxLevel-2//显示层级
+                    "lo":opener.useprameters.PGIS_Center_lo,//中心点
+                    "la": opener.useprameters.PGIS_Center_la,//中心点
+                    "maxLevel": opener.useprameters.maxLevel,//最大层级
+                    "minLevel": opener.useprameters.minLevel,//最小层级
+                    "currentLevel": opener.useprameters.maxLevel-2//显示层级
                 }
                 console.info(viewParam);
                 var view = createView(GISTYPE, viewParam);//创建视图
@@ -470,20 +488,37 @@ export default {
                 }
             },
           setlanguage(){
+              if (opener.useprameters.defaultLanguage=='zh-CN'){
+                  return;
+              }
+            this.controlwidth=635;
             this.language={
-               basestation:GetTextByName("OperateLogIdentityDeviceType0"),
-               open:GetTextByName("Single_Open"),
-               close:GetTextByName("Closebtn"),
-               selectTime:GetTextByName("SelectDate"),
-               srriInfo:GetTextByName("FSHeatMap"),
-               issi:GetTextByName("Terminal"),
-               MSvalue:GetTextByName("signaldown"),
-               UIvalue:GetTextByName("signalup"),
-               selectSrri:GetTextByName("FSFWHeatMap"),
+               basestation:opener.GetTextByName("OperateLogIdentityDeviceType0"),
+               open:opener.GetTextByName("Single_Open"),
+               close:opener.GetTextByName("Closebtn"),
+               selectTime:opener.GetTextByName("SelectDate"),
+               srriInfo:opener.GetTextByName("FSHeatMap"),
+               issi:opener.GetTextByName("Terminal"),
+               MSvalue:opener.GetTextByName("signaldown"),
+               UIvalue:opener.GetTextByName("signalup"),
+               selectSrri:opener.GetTextByName("FSFWHeatMap"),
            }
-           this.legendLabel=GetTextByName("legend"); 
-
+           this.legendLabel=opener.GetTextByName("legend"); 
+             this.cityList= [
+                    {
+                        value: 'MS',
+                        label: opener.GetTextByName("signaldown")
+                    },
+                    {
+                        value: 'UI',
+                        label: opener.GetTextByName("signalup")
+                    }
+                ]
+         },
+         init(){
+             
          } 
+
         },
 
     }
@@ -492,7 +527,6 @@ export default {
 
 #control{
     height:40px;
-    width: 575px;
     position: absolute;
     z-index: 999;
     right: 20px;
