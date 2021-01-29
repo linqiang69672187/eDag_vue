@@ -72,15 +72,15 @@ export default {
                 bsmap:null,
                  cityList: [
                     {
-                        value: 'MsRssi',
+                        value: 'MS',
                         label: '手台场强'
                     },
                     {
-                        value: 'UlRssi',
+                        value: 'UI',
                         label: '上行场强'
                     }
                 ],
-                ssri: 'MsRssi',
+                ssri: 'MS',
                 legendLabel:'图例',
                 sdate:[],
                 BeaconStatus:false,
@@ -142,7 +142,7 @@ export default {
     methods:{  
          loadBsStation(){
                 let _this =this;
-               Vue.axios.get('/Handlers/GetAllBaseStation_geojson.ashx', { // ，/app/data/json/OnlineTerminalCountGroupByBS.json，/Handlers/MVCEasy.ashx，
+               Vue.axios.get('/Handlers/GetAllBaseStation.ashx', { // ，/app/data/json/OnlineTerminalCountGroupByBS.json，/Handlers/MVCEasy.ashx，
                             params: {
                                 L:'1',                                         
                             }
@@ -170,7 +170,7 @@ export default {
                 if (date1[0]=="") return;
                 this.spinShow=true;
                 let _this =this;
-                Vue.axios.get('/Handlers/getHeatmapRssidata.ashx', { // ，/app/data/json/OnlineTerminalCountGroupByBS.json，/Handlers/MVCEasy.ashx，'/Handlers/getHeatmapRssidata.ashx'
+                Vue.axios.get('/Handlers/getHeatmapRssidata.ashx', { // ，/app/data/json/OnlineTerminalCountGroupByBS.json，/Handlers/MVCEasy.ashx，
                             params: {
                                 type:this.ssri,
                                 sdate:sdate, 
@@ -263,20 +263,55 @@ export default {
             createFeature (data) {
                      let source = this.htmap.getSource();
                            source.clear();
-                            let myfeatures = (new ol.format.GeoJSON()).readFeatures(data, {     // 用readFeatures方法可以自定义坐标系
-                                        dataProjection: 'EPSG:4326',    // 设定JSON数据使用的坐标系
-                                        featureProjection: 'EPSG:3857' // 设定当前地图使用的feature的坐标系
+                      
+                        let count =0;
+                         data.forEach(element=>{
+                              count+=1;
+                               let geom = new ol.geom.Point(ol.proj.fromLonLat(element.co));
+                               let feature = new ol.Feature({
+                                   geometry: geom,
+                                  // MS : element.MS,
+                                 //  UI : element.UI,
+                                 // issi : element.issi,
+                               });
+                               if (count%100==0){
+                               this.sleepThread(100);
+                               console.info("count:"+count);
+                               }
+                               let Rssi = this.ssri=="MS"?parseInt(element.MS):parseInt(element.UI);
+                               let color=this.fillColor(Rssi)
+                               feature.setStyle(
+                                    new ol.style.Style({
+                                        image: new ol.style.Circle({
+                                            radius: 10,
+                                            fill: new ol.style.Fill({
+                                                color: color
+                                            }),
+                                        })
                                     })
-                           source.addFeatures(myfeatures);
+                                );
+                             source.addFeature(feature);
+                         })  
+                        // return source;  
                        this.spinShow=false;                         
                 },
             createBsFeature(data){
                  let source = this.bsmap.getSource();
-                            let myfeatures = (new ol.format.GeoJSON()).readFeatures(data, {     // 用readFeatures方法可以自定义坐标系
-                                        dataProjection: 'EPSG:4326',    // 设定JSON数据使用的坐标系
-                                        featureProjection: 'EPSG:3857' // 设定当前地图使用的feature的坐标系
-                                    })
-                           source.addFeatures(myfeatures);
+                  data.forEach(element=>{
+                    let Bs = new ol.Feature({
+                    geometry:new ol.geom.Point(ol.proj.transform([element.Lo, element.La],'EPSG:4326','EPSG:3857'))
+                });
+                
+                Bs.setStyle(new ol.style.Style({
+                    image:new ol.style.Icon({
+                        src:'../Images/BaseStation.png',
+                          offsetX: -30,
+                          offsetY: -36,
+                    })
+                 }));
+                
+                  source.addFeature(Bs);
+                  }) 
             }, 
             fillColor(Rssi){
                 let r=255,g=255,b=255;
@@ -381,46 +416,17 @@ export default {
             
                 var offlineMapLayerParams = createBaseMapParameter(GISTYPE);
                 var streetMapLayer = createStreetMapLayer(this.map, "offlineMapLayer", offlineMapLayerParams);//创建街景图
-                var source = new ol.source.Vector({
-                  //  url:'/Handlers/heatmap.json',
-                   //  format: new ol.format.GeoJSON(),
-                }) ;
+                var source = new ol.source.Vector({}) ;
                 this.htmap = new ol.layer.Vector({
                             source: source,
-                      });   
-                var bssource = new ol.source.Vector({
-                    
-                }) ;    
+                        });   
+                var bssource = new ol.source.Vector({}) ;    
                 this.bsmap = new ol.layer.Vector({
                             source: bssource,
-                            style:new ol.style.Style({
-                                image:new ol.style.Icon({
-                                    src:'../Images/BaseStation.png',
-                                    offsetX: -30,
-                                    offsetY: -36,
-                                })
-                            })
                         });  
                 this.map.addLayer(this.htmap);
                 this.map.addLayer(this.bsmap);
                 let _this=this;
-                
-                source.on('addfeature', function (event) {
-                    var feature = event.feature;
-                    let color=_this.fillColor(feature.get('value'))
-                               feature.setStyle(
-                                    new ol.style.Style({
-                                        image: new ol.style.Circle({
-                                            radius: 10,
-                                            fill: new ol.style.Fill({
-                                                color: color
-                                            }),
-                                        })
-                                    })
-                                );
-                    });
-            
-
                 /**
                 let saoguan = new ol.Feature({
                     geometry:new ol.geom.Point(ol.proj.transform([123.4659219, 41.761773],'EPSG:4326','EPSG:3857'))
@@ -500,11 +506,11 @@ export default {
            this.legendLabel=opener.GetTextByName("legend"); 
              this.cityList= [
                     {
-                        value: 'MsRssi',
+                        value: 'MS',
                         label: opener.GetTextByName("signaldown")
                     },
                     {
-                        value: 'UlRssi',
+                        value: 'UI',
                         label: opener.GetTextByName("signalup")
                     }
                 ]

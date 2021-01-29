@@ -109,23 +109,7 @@ function displaypolicelistsdiv(){
     //document.getElementById("contextmenu_container2").parentNode.style.display = "none";
     //heatMapManager.open();
 
-    jsPanel.create({
-        id: 'heatMapPanel',
-        theme: 'primary',
-        headerTitle: '场强',
-        headerControls: {
-            maximize: 'remove'
-        },
-        contentSize: {
-            width: 1000,
-            height: 500
-        },
-        contentOverflow: 'hidden',
-        content: '<iframe scrolling="auto" frameborder="0" src="one.html" style="width:100%;height:100%;"></iframe>',
-        callback: function () {
-
-        }
-    });
+    window.open('one.html')
 }
 
 function heatmapwork(data){
