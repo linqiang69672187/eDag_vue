@@ -39,7 +39,7 @@
           <Page :total="100" />
        </div>
        -->
-           <!-- <notice ref="notice"></notice> -->
+            <notice ref="notice"></notice>
              
           <Spin fix  v-if="spinShow">
                 <Icon type="ios-loading" size=18 class="demo-spin-icon-load"></Icon>
@@ -54,7 +54,7 @@ import Vue from 'vue';
 
 import { Select,DatePicker,Page,Spin,Icon,Button, Switch } from 'iview'
 Vue.component('i-switch', Switch)
-// import notice from "@/components/control/notices";
+import notice from "@/components/control/notices";
 
 
 // configure language
@@ -132,7 +132,7 @@ export default {
          window.vue_index= this;
     },
     components:{
-        // notice,
+         notice,
     },
     mounted(){
       this.setlanguage();
@@ -241,12 +241,12 @@ export default {
                         ctx.fillRect(offsetX, textOffsetHeight + offsetY + rectHeight, rectWidth, rectHeight / 4);
 
                         //绘制标签
-                        drawLabel(offsetX + rectWidth + 2, textOffsetHeight + offsetY, "#000", "fill", 0 + " dB", "12");
+                        drawLabel(offsetX + rectWidth + 2, textOffsetHeight + offsetY, "#000", "fill", 20 + " dB", "12");
                         drawLabel(offsetX + rectWidth + 2, textOffsetHeight + offsetY + rectHeight / 4, "#000", "fill", "-80 dB", "12");
                         drawLabel(offsetX + rectWidth + 2, textOffsetHeight + offsetY + rectHeight / 2, "#000", "fill", "-90 dB", "12");
                         drawLabel(offsetX + rectWidth + 2, textOffsetHeight + offsetY + rectHeight * 3 / 4, "#000", "fill", "-100 dB", "12");
                         drawLabel(offsetX + rectWidth + 2, textOffsetHeight + offsetY + rectHeight, "#000", "fill", "-110 dB", "12");
-                        drawLabel(offsetX + rectWidth + 2, textOffsetHeight + offsetY + rectHeight * 5 / 4, "#000", "fill", "-150 dB", "12");
+                        drawLabel(offsetX + rectWidth + 2, textOffsetHeight + offsetY + rectHeight * 5 / 4, "#000", "fill", "-120 dB", "12");
                      let content = document.getElementById("legend");
                      content.appendChild(canvas);
 
@@ -292,13 +292,13 @@ export default {
                      b = parseInt((Rssi-80)/10*255);
                        
                 };
-               if(90<Rssi&&Rssi<=100){
+               if(90<Rssi&&Rssi<100){
                      r =  parseInt((Rssi-90)/10*255);
                      g =  parseInt((Rssi-90)/10*255);
                      b =  parseInt(255-(Rssi-90)/100*255);
                        
                 };
-               if(100<Rssi&&Rssi<=110){
+               if(100<=Rssi&&Rssi<=110){
                      r =  255;
                      g =  parseInt(255-(Rssi-100)/10*255);
                      b = 0;
@@ -441,7 +441,7 @@ export default {
                             return interaction instanceof ol.interaction.DoubleClickZoom;
                             });
                 this.map.removeInteraction(dblClickInteraction);
-                /**
+  
                 this.map.on('dblclick', function (evt) {
                   //  point_overlay.setPosition([0, 0]);
                    // $(".zq1").hide();
@@ -455,18 +455,17 @@ export default {
                       //  var pixel = map.getPixelFromCoordinate(coordinates);
 
 
-                        let MS = feature.get('MS');
-                        let UI = feature.get("UI");
-                        let issi = feature.get("issi");  
+                        let value = feature.get('value');
+                   
     
-                        _this.$refs.notice.info(_this.language.srriInfo,_this.language.issi+"："+issi+"<br/>"+_this.language.MSvalue+"："+MS+"<br/>"+_this.language.UIvalue+"："+UI);
+                        _this.$refs.notice.info(_this.language.srriInfo,_this.language.MSvalue+"："+value+"<br/>");
                         //srriInfo:'场强信息',
                        //issi:'终端号码',
                        //MSvalue:'手台场强',
                        //UIvalue:'下行场强',
                     }
                 });
-                 */
+            
               //  this.map.getView().on('change:resolution', this.changemapcenter);
                // this.map.getView().on('change:center',this.changemapcenter);
             },
