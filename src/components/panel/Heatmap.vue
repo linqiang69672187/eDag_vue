@@ -28,7 +28,22 @@
                 </li>
             
            </ul>
-          
+          <ul>
+               <li>  
+                场强点设置：
+               </li>
+               <li>
+                    <Slider class="rssirang" :max="10" :min="1" v-model="pointvalue" ></Slider>
+                </li>
+               <li class="cq_class">
+                显示场强范围： 
+               </li>
+                <li class="cq_class">
+                    <Slider class="rssirang" :max="120" :min="20" v-model="rssirang" range></Slider>
+                </li> 
+            
+               
+           </ul>
        </div>
        <div id="legend">
 
@@ -52,7 +67,7 @@
 <script>
 import Vue from 'vue';
 
-import { Select,DatePicker,Page,Spin,Icon,Button, Switch } from 'iview'
+import { Select,DatePicker,Page,Spin,Icon,Button, Switch,Slider} from 'iview'
 Vue.component('i-switch', Switch)
 import notice from "@/components/control/notices";
 
@@ -85,6 +100,8 @@ export default {
                 sdate:[],
                 BeaconStatus:false,
                 controlwidth:610,
+                rssirang:[20, 50],
+                pointvalue:5,
                 /**
                 columns5: [
                     {
@@ -517,9 +534,14 @@ export default {
     }
 </script>
 <style scoped>
-
+.rssirang{
+    width: 180px;
+}
+.cq_class{
+    margin-left: 80px;
+}
 #control{
-    height:40px;
+    height:70px;
     position: absolute;
     z-index: 999;
     right: 20px;
