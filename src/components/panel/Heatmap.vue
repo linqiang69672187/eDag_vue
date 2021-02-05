@@ -1,5 +1,11 @@
 <template>
     <div  style="height:100%">
+       <div class="bsTree">  <Button type="primary" @click="treeopen=true" shape="circle" icon="ios-search"></Button>
+            <Drawer title="基站树" width="180" placement="left" :closable="false" v-model="treeopen">
+               <BSTree></BSTree>
+            </Drawer>
+       </div>
+
        <div id="control" :style="{  width: controlwidth + 'px' }">
            <ul>
                
@@ -81,11 +87,10 @@
 </template>
 <script>
 import Vue from 'vue';
-
-import { Select,DatePicker,Page,Spin,Icon,Button, Switch,Slider,Dropdown} from 'iview'
+import { Select,DatePicker,Page,Spin,Icon,Button, Switch,Slider,Dropdown,Drawer} from 'iview'
 Vue.component('i-switch', Switch)
 import notice from "@/components/control/notices";
-
+import BSTree from "@/components/control/BSTree";
 
 // configure language
 
@@ -117,6 +122,7 @@ export default {
                 controlwidth:800,
                 rssirang:[20, 120],
                 pointvalue:5,
+                treeopen:false,
                 /**
                 columns5: [
                     {
@@ -158,7 +164,8 @@ export default {
                     switchName:'交换名称',
                     switchID:'交换号码',
                     Inserttb_time:'上报时间'
-                }
+                },
+                
            
         }
     },
@@ -170,6 +177,7 @@ export default {
     },
     components:{
          notice,
+         BSTree,
     },
     mounted(){
       this.setlanguage();
@@ -656,6 +664,15 @@ export default {
     white-space: nowrap;
     text-align: center;
     border-radius: 5px;
+}
+.bsTree{
+    position:absolute;
+    z-index: 2;
+    height: 40px;
+    width: 40px;
+    float: left;
+    top: 10px;
+    left: 10px;
 }
 #control>ul{
     margin-left: 5px;
