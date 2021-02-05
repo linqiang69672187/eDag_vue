@@ -16,7 +16,7 @@ function openwindows(windowstr){
     mycallfunction('DispatchFunc', 450, 600)
 }
 function GetTextByName(name){
-    return "范围场强";
+    return "场强";
 } 
 var useprameters={};
 useprameters.Emapurl="http://10.8.59.253:8081/";
@@ -30,7 +30,7 @@ useprameters.GISTYPE="tianditu"; //tianditu,google
 useprameters.name = "zhej";
 useprameters.usename = "LQ";
 useprameters.servertime = "1571984937504";
-useprameters.defaultLanguage="en-US";
+useprameters.defaultLanguage="zh-CN";
 useprameters.SystemType ="1";
 
 useprameters.DTCZEnable = "1"; //动态重组是否启用 

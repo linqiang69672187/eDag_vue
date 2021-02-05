@@ -2,6 +2,35 @@
     <div  style="height:100%">
        <div id="control" :style="{  width: controlwidth + 'px' }">
            <ul>
+               
+               <li>
+                   <Dropdown>
+                        <Button type="primary">
+                            场强点大小
+                            <Icon type="ios-arrow-down"></Icon>
+                        </Button>
+                        <DropdownMenu slot="list">
+                            <DropdownItem>
+                                <Slider class="rssirang" @on-input="opintchange" :max="10" :min="1" v-model="pointvalue" ></Slider>
+                            </DropdownItem>
+                
+                        </DropdownMenu>
+                    </Dropdown>
+               </li>
+               <li>
+                   <Dropdown>
+                        <Button type="primary">
+                            显示场强范围
+                            <Icon type="ios-arrow-down"></Icon>
+                        </Button>
+                        <DropdownMenu slot="list">
+                            <DropdownItem>
+                                <Slider class="rssirang"  @on-change="selectHeatmap" :max="120" :min="20" v-model="rssirang" range></Slider>
+                            </DropdownItem>
+                
+                        </DropdownMenu>
+                    </Dropdown>
+               </li>
                <li>  
                    <Select v-model="ssri" :disabled="spinShow"  style="width:100px" >
                       <Option v-for="item in cityList" :value="item.value" :key="item.value">{{ item.label }}</Option>
@@ -27,23 +56,9 @@
                  <Button  icon="ios-map"  :disabled="spinShow"  @click="selectHeatmap">{{language.selectSrri}}</Button>
                 </li>
             
-           </ul>
-          <ul>
-               <li>  
-                场强点设置：
-               </li>
-               <li>
-                    <Slider class="rssirang" :max="10" :min="1" v-model="pointvalue" ></Slider>
-                </li>
-               <li class="cq_class">
-                显示场强范围： 
-               </li>
-                <li class="cq_class">
-                    <Slider class="rssirang" :max="120" :min="20" v-model="rssirang" range></Slider>
-                </li> 
-            
-               
-           </ul>
+           </ul>       
+            <!-- <Slider class="rssirang" :max="10" :min="1" v-model="pointvalue" ></Slider> -->    
+            <!-- <Slider class="rssirang" :max="120" :min="20" v-model="rssirang" range></Slider> -->
        </div>
        <div id="legend">
 
@@ -67,7 +82,7 @@
 <script>
 import Vue from 'vue';
 
-import { Select,DatePicker,Page,Spin,Icon,Button, Switch,Slider} from 'iview'
+import { Select,DatePicker,Page,Spin,Icon,Button, Switch,Slider,Dropdown} from 'iview'
 Vue.component('i-switch', Switch)
 import notice from "@/components/control/notices";
 
@@ -99,8 +114,8 @@ export default {
                 legendLabel:'图例',
                 sdate:[],
                 BeaconStatus:false,
-                controlwidth:610,
-                rssirang:[20, 50],
+                controlwidth:800,
+                rssirang:[20, 120],
                 pointvalue:5,
                 /**
                 columns5: [
@@ -137,7 +152,12 @@ export default {
                     basestation:'基 站',
                     open:'开启',
                     close:'关闭',
-                    selectSrri:'查看当前范围场强'
+                    selectSrri:'查看当前范围场强',
+                    basestationName:'基站名称',
+                    basestationISSI:'基站号码',
+                    switchName:'交换名称',
+                    switchID:'交换号码',
+                    Inserttb_time:'上报时间'
                 }
            
         }
@@ -175,6 +195,8 @@ export default {
             },
             loadHeatmapData(date1){
                 console.info(date1);
+                console.info(this.rssirang);
+                console.info(this.pointvalue);
                 if (this.spinShow)return;
                 var extent = this.map.getView().calculateExtent(this.map.getSize());
 
@@ -191,12 +213,13 @@ export default {
                             params: {
                                 type:this.ssri,
                                 sdate:sdate, 
-                                  bbs:bbs                       
+                                  bbs:bbs,
+                                  range0:this.rssirang[0],
+                                  range1:this.rssirang[1],  
                             }
                           }).then((res) => {
                             _this.createFeature(res.data);
-                           
-                           _this.rssiData =  res.data;
+                            _this.rssiData =  res.data;
                             _this.spinShow=false;
                           }).catch((err) => {
                           console.log(err)
@@ -370,7 +393,25 @@ export default {
             changemap(){
                this.$router.push({name:'index'}) 
             },
-         
+            opintchange(){
+                let features = this.htmap.getSource().getFeatures();
+          
+                features.forEach(element=>{
+                              let Rssi = parseInt(element.get('value')); 
+                               let color= this.fillColor(Rssi)
+                               element.setStyle(
+                                    new ol.style.Style({
+                                        image: new ol.style.Circle({
+                                            radius: this.pointvalue,
+                                              fill: new ol.style.Fill({
+                                                color: color
+                                            }),
+                                        })
+                                    })
+                                );
+                             
+                         })  
+            },
             initMap() {
           
                 this.createLegend();
@@ -402,8 +443,10 @@ export default {
                   //  url:'/Handlers/heatmap.json',
                    //  format: new ol.format.GeoJSON(),
                 }) ;
+                 let _this=this;
                 this.htmap = new ol.layer.Vector({
                             source: source,
+                           
                       });   
                 var bssource = new ol.source.Vector({
                     
@@ -412,7 +455,8 @@ export default {
                             source: bssource,
                             style:new ol.style.Style({
                                 image:new ol.style.Icon({
-                                    src:'../Images/BaseStation.png',
+                                    //src:'../Images/BaseStation.png',
+                                    src:require('@/assets/images/BaseStation.png') ,
                                     offsetX: -30,
                                     offsetY: -36,
                                 })
@@ -420,7 +464,7 @@ export default {
                         });  
                 this.map.addLayer(this.htmap);
                 this.map.addLayer(this.bsmap);
-                let _this=this;
+               
                 
                 source.on('addfeature', function (event) {
                     var feature = event.feature;
@@ -428,7 +472,7 @@ export default {
                                feature.setStyle(
                                     new ol.style.Style({
                                         image: new ol.style.Circle({
-                                            radius: 10,
+                                            radius: _this.pointvalue,
                                             fill: new ol.style.Fill({
                                                 color: color
                                             }),
@@ -468,14 +512,55 @@ export default {
                             return feature;
                         });
                     if (feature) {
-                     //   var coordinates = feature.getGeometry().getCoordinates();
-                      //  var pixel = map.getPixelFromCoordinate(coordinates);
-
-
+                        var featurecoordinates = feature.getGeometry().getCoordinates();
+                        let mousecoordinates =  _this.map.getCoordinateFromPixel(evt.pixel)
+                        let coordinates=_this.findCloseNum(featurecoordinates,mousecoordinates);
                         let value = feature.get('value');
-                   
+                        let lntlo = ol.proj.transform(coordinates,'EPSG:3857', 'EPSG:4326');
+                        let lon = (lntlo[0]+0.000001+"").substring(0,8);
+                        let lat = (lntlo[1]+0.000001+"").substring(0,7);
+                        
+                        switch (value) {
+                            case "BS":
+                                    Vue.axios.get('/Handlers/getBasestationbycoordinates.ashx', { // ，/app/data/json/OnlineTerminalCountGroupByBS.json，/Handlers/MVCEasy.ashx，
+                                                params: {
+                                                    lon,
+                                                    lat                                       
+                                                }
+                                            }).then((res) => {
+                                                    // basestationName:'基站名称',
+                                                    // basestationISSI:'基站号码',
+                                                    // switchName:'交换名称',
+                                                    // switchID:'交换号码',
+                                                _this.$refs.notice.info(_this.language.basestation,_this.language.basestationName+"："+res.data[0].StationName+"<br/>"+_this.language.basestationISSI+"："+res.data[0].StationISSI+"<br/>"+_this.language.switchName+"："+res.data[0].switchName+"<br/>"+_this.language.switchID+"："+res.data[0].SwitchID);
+                                            }).catch((err) => {
+                                            console.log(err)
+                                            });   
+                                 
+                                break;
+                            default:
+                                let type= feature.get('type');
+                                    Vue.axios.get('/Handlers/getRssibyCoordinates.ashx', { // ，/app/data/json/OnlineTerminalCountGroupByBS.json，/Handlers/MVCEasy.ashx，
+                                                params: {
+                                                    lon,
+                                                    lat,
+                                                    value,
+                                                    type                                       
+                                                }
+                                            }).then((res) => {
+                                                    // basestationName:'基站名称',
+                                                    // basestationISSI:'基站号码',
+                                                    // switchName:'交换名称',
+                                                    // switchID:'交换号码',
+                                                _this.$refs.notice.info(_this.language.srriInfo,_this.language.MSvalue+"："+res.data[0].MsRssi+"<br/>"+_this.language.UIvalue+"："+res.data[0].UlRssi+"<br/>"+_this.language.basestationName+"："+res.data[0].StationName+"<br/>"+_this.language.Inserttb_time+"："+res.data[0].Inserttb_time);
+                                            }).catch((err) => {
+                                            console.log(err)
+                                            });   
+                                
+                                break;
+                        }
     
-                        _this.$refs.notice.info(_this.language.srriInfo,_this.language.MSvalue+"："+value+"<br/>");
+                   
                         //srriInfo:'场强信息',
                        //issi:'终端号码',
                        //MSvalue:'手台场强',
@@ -488,6 +573,22 @@ export default {
             },
             changemapcenter(){
                 this.loadHeatmapData(this.sdate);
+                 
+            },
+            findCloseNum(arr, num) {
+                var index = 0; // 保存最接近数值在数组中的索引
+                var d_value = Number.MAX_VALUE; // 保存差值绝对值，默认为最大数值
+                for (var i = 0; i < arr.length; i++) {
+                    var new_d_value = Math.abs(arr[i][0] - num[0])+Math.abs(arr[i][1] - num[1]); // 新差值
+                    if (new_d_value <= d_value) { // 如果新差值绝对值小于等于旧差值绝对值，保存新差值绝对值和索引
+                        if (new_d_value === d_value && arr[i] < arr[index]) { // 如果数组中两个数值跟目标数值差值一样，取大
+                            continue;
+                        }
+                        index = i;
+                        d_value = new_d_value;
+                    }
+                }
+                return arr[index] // 返回最接近的数值
             },
             Beaconchange(){
                 this.bsmap.setVisible(this.BeaconStatus);
@@ -501,7 +602,7 @@ export default {
               if (opener.useprameters.defaultLanguage=='zh-CN'){
                   return;
               }
-            this.controlwidth=635;
+            this.controlwidth=835;
             this.language={
                basestation:opener.GetTextByName("OperateLogIdentityDeviceType0"),
                open:opener.GetTextByName("Single_Open"),
@@ -512,6 +613,11 @@ export default {
                MSvalue:opener.GetTextByName("signaldown"),
                UIvalue:opener.GetTextByName("signalup"),
                selectSrri:opener.GetTextByName("FSFWHeatMap"),
+                basestationName:'基站名称',
+                basestationISSI:'基站号码',
+                switchName:'交换名称',
+                switchID:'交换号码',
+                Inserttb_time:'上报时间'
            }
            this.legendLabel=opener.GetTextByName("legend"); 
              this.cityList= [
@@ -535,13 +641,13 @@ export default {
 </script>
 <style scoped>
 .rssirang{
-    width: 180px;
+    width: 150px;
 }
 .cq_class{
-    margin-left: 80px;
+    margin-left: 60px;
 }
 #control{
-    height:70px;
+    height:40px;
     position: absolute;
     z-index: 999;
     right: 20px;
@@ -562,8 +668,7 @@ export default {
     margin-right: 10px;;
 }
 #control>ul>li:nth-child(2){
-padding-top: 0px;
-width: 100px;
+
 text-align: right;
 }
 #legend{
